@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>解析力学 問題整理と解説｜ハミルトン形式・正準変換</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;600;700&family=Zen+Old+Mincho:wght@600&display=swap" rel="stylesheet">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js" async></script>
+<style>
+  :root{
+    --bg: #eef2ee;
+    --bg-deep: #e4ebe4;
+    --paper: #fbfcfa;
+    --paper-tint: #f2f6f1;
+    --ink: #223028;
+    --ink-soft: #4b5c52;
+    --line: #d6ddd4;
+    --pine: #1f5c4c;
+    --pine-deep: #163f34;
+    --sienna: #b4552b;
+    --sienna-tint: #f4e6dd;
+    --gold: #a8863a;
+    --sky: #2b5f7a;
+    --sky-deep: #1c4258;
+    --sky-tint: #e6eff4;
+    --sky-line: #c7d9e3;
+    --amber: #9c6b12;
+    --amber-tint: #faf2df;
+    --amber-line: #d8b567;
+    --shadow: 0 1px 2px rgba(26,42,33,.04), 0 6px 20px rgba(26,42,33,.06);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 90% -10%, #e9f0e6 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, #eef2ee 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans JP", "Hiragino Sans", sans-serif;
+    line-height:1.85;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:var(--pine); }
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns: 280px minmax(0,1fr);
+    max-width:1240px;
+    margin:0 auto;
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    position:sticky;
+    top:0;
+    align-self:start;
+    height:100vh;
+    overflow-y:auto;
+    padding:34px 22px 40px 28px;
+    border-right:1px solid var(--line);
+  }
+  .sidebar::-webkit-scrollbar{ width:6px; }
+  .sidebar::-webkit-scrollbar-thumb{ background:#c7d1c4; border-radius:4px; }
+
+  .brand{
+    font-family:"Shippori Mincho", serif;
+    font-weight:700;
+    font-size:1.05rem;
+    color:var(--pine-deep);
+    letter-spacing:.02em;
+    margin:0 0 4px;
+  }
+  .brand-sub{
+    font-size:.72rem;
+    color:var(--ink-soft);
+    letter-spacing:.08em;
+    margin-bottom:26px;
+  }
+
+  .nav-group{ margin-bottom:22px; }
+  .nav-group-title{
+    font-size:.68rem;
+    letter-spacing:.14em;
+    color:var(--gold);
+    font-weight:700;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .nav-group.is-concept .nav-group-title{ color:var(--sky); }
+  .nav-group a{
+    display:flex;
+    gap:8px;
+    align-items:baseline;
+    text-decoration:none;
+    color:var(--ink-soft);
+    font-size:.86rem;
+    padding:5px 8px;
+    border-radius:7px;
+    transition:background .15s, color .15s;
+  }
+  .nav-group a:hover{ background:var(--paper-tint); color:var(--pine-deep); }
+  .nav-group a .idx{
+    font-family:"Zen Old Mincho", serif;
+    color:var(--pine);
+    font-weight:600;
+    min-width:1.4em;
+  }
+  .nav-group.is-concept a .idx{ color:var(--sky); }
+
+  /* ---------- main content ---------- */
+  main{ padding:48px clamp(20px,4vw,64px) 100px; min-width:0; }
+
+  .hero{
+    background:linear-gradient(135deg, var(--pine-deep), var(--pine) 70%);
+    color:#f2f5ec;
+    border-radius:18px;
+    padding:40px 38px;
+    margin-bottom:28px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; right:-60px; top:-60px;
+    width:220px; height:220px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,.10), transparent 70%);
+  }
+  .hero-eyebrow{
+    font-size:.75rem; letter-spacing:.16em; text-transform:uppercase;
+    color:#cfe3d3; margin-bottom:10px;
+  }
+  .hero h1{
+    font-family:"Shippori Mincho", serif;
+    font-weight:800;
+    font-size:clamp(1.5rem, 2.6vw, 2.1rem);
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .hero p{
+    max-width:640px; color:#dfe9df; font-size:.95rem; margin:0;
+  }
+  .hero-tags{ display:flex; gap:10px; flex-wrap:wrap; margin-top:22px; }
+  .hero-tags span{
+    font-size:.74rem; padding:5px 12px; border-radius:999px;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22);
+    color:#eef4ea;
+  }
+
+  /* ---------- in-content table of contents ---------- */
+  .toc{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:26px 28px 10px;
+    margin-bottom:44px;
+    box-shadow:var(--shadow);
+  }
+  .toc-heading{
+    display:flex; align-items:center; gap:10px;
+    font-family:"Shippori Mincho", serif;
+    font-size:1.05rem; font-weight:700;
+    color:var(--pine-deep);
+    margin:0 0 18px;
+  }
+  .toc-heading::before{ content:"📑"; font-size:1rem; }
+  .toc-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(210px,1fr));
+    gap:6px 24px;
+  }
+  .toc-group{ margin-bottom:18px; }
+  .toc-group-title{
+    font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:var(--gold);
+    margin-bottom:6px;
+  }
+  .toc-group.is-concept .toc-group-title{ color:var(--sky); }
+  .toc-group a{
+    display:flex; gap:8px; align-items:baseline;
+    text-decoration:none; color:var(--ink-soft);
+    font-size:.86rem; padding:4px 6px; border-radius:6px;
+    transition:background .15s, color .15s;
+  }
+  .toc-group a:hover{ background:var(--paper-tint); color:var(--pine-deep); }
+  .toc-group a .idx{
+    font-family:"Zen Old Mincho", serif; color:var(--pine);
+    font-weight:600; min-width:1.5em; flex:none;
+  }
+  .toc-group.is-concept a .idx{ color:var(--sky); }
+
+  .back-to-toc{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:.78rem; color:var(--ink-soft);
+    text-decoration:none;
+    margin:0 0 18px;
+  }
+  .back-to-toc:hover{ color:var(--pine-deep); }
+
+  /* ---------- legend ---------- */
+  .legend{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px 20px;
+    margin-bottom:44px;
+    box-shadow:var(--shadow);
+  }
+  .legend-item{ display:flex; gap:10px; align-items:flex-start; font-size:.82rem; color:var(--ink-soft); }
+  .legend-swatch{ flex:none; width:14px; height:14px; border-radius:4px; margin-top:3px; }
+  .legend strong{ display:block; color:var(--ink); font-size:.84rem; margin-bottom:1px; }
+
+  h2.chapter{
+    font-family:"Shippori Mincho", serif;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--pine-deep);
+    display:flex; align-items:center; gap:14px;
+    margin:64px 0 6px;
+    padding-bottom:14px;
+    border-bottom:2px solid var(--pine-deep);
+  }
+  h2.chapter .chap-no{
+    font-family:"Zen Old Mincho", serif;
+    background:var(--pine-deep); color:#f2f5ec;
+    font-size:.95rem; font-weight:600;
+    padding:6px 12px; border-radius:8px;
+    flex:none;
+  }
+  h2.chapter.is-concept{ border-bottom-color:var(--sky); color:var(--sky-deep); }
+  h2.chapter.is-concept .chap-no{ background:var(--sky); }
+
+  .chapter-note{
+    color:var(--ink-soft); font-size:.9rem; margin:0 0 30px;
+  }
+
+  h3.section-title{
+    font-family:"Shippori Mincho", serif;
+    font-size:1.15rem;
+    color:var(--pine-deep);
+    margin:14px 0 8px;
+  }
+
+  /* ---------- concept (prerequisite knowledge) box ---------- */
+  .concept{
+    background:var(--sky-tint);
+    border:1px solid var(--sky-line);
+    border-left:5px solid var(--sky);
+    border-radius:0 14px 14px 0;
+    padding:24px 28px;
+    margin:0 0 36px;
+    box-shadow:var(--shadow);
+  }
+  .concept + .concept{ margin-top:-14px; }
+  .concept-label{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:.72rem; letter-spacing:.1em; font-weight:700;
+    color:#fff; background:var(--sky);
+    padding:3px 12px; border-radius:999px;
+    margin-bottom:12px;
+  }
+  .concept h4{
+    font-family:"Shippori Mincho", serif;
+    font-size:1rem; color:var(--sky-deep);
+    margin:18px 0 8px;
+  }
+  .concept h4:first-of-type{ margin-top:4px; }
+  .concept p{ font-size:.92rem; margin:0 0 10px; color:#233a46; }
+  .concept ul{ margin:0 0 10px; padding-left:1.3em; font-size:.92rem; color:#233a46; }
+  .concept li{ margin-bottom:4px; }
+  .concept table{
+    width:100%; border-collapse:collapse; font-size:.84rem; margin:8px 0 14px;
+    background:#fff; border-radius:8px; overflow:hidden;
+  }
+  .concept table th, .concept table td{
+    border:1px solid var(--sky-line); padding:8px 10px; text-align:left; vertical-align:top;
+  }
+  .concept table th{ background:#d9e7ee; color:var(--sky-deep); font-weight:700; }
+
+  /* ---------- problem card ---------- */
+  .problem{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:30px 32px;
+    margin:0 0 40px;
+    box-shadow:var(--shadow);
+    scroll-margin-top:24px;
+  }
+  .problem-head{
+    display:flex; align-items:flex-start; gap:16px;
+    margin-bottom:16px;
+  }
+  .p-badge{
+    flex:none;
+    width:46px; height:46px;
+    border-radius:12px;
+    background:var(--pine-deep);
+    color:#f4f8f1;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.05rem; font-weight:700;
+  }
+  .p-meta{ flex:1; }
+  .p-source{
+    font-size:.74rem; letter-spacing:.06em;
+    color:var(--gold); font-weight:700; text-transform:uppercase;
+    margin-bottom:3px;
+  }
+  .p-title{
+    font-family:"Shippori Mincho", serif;
+    font-size:1.08rem; font-weight:700; color:var(--ink);
+  }
+
+  .statement{
+    background:var(--paper-tint);
+    border-left:4px solid var(--pine);
+    border-radius:0 10px 10px 0;
+    padding:16px 20px;
+    margin:0 0 22px;
+    font-size:.96rem;
+    color:#2c3c33;
+  }
+  .statement p{ margin:0 0 6px; }
+  .statement p:last-child{ margin-bottom:0; }
+
+  .solution-label{
+    display:inline-block;
+    font-size:.72rem; letter-spacing:.12em; font-weight:700;
+    color:#fff; background:var(--pine);
+    padding:3px 10px; border-radius:999px;
+    margin-bottom:12px;
+  }
+
+  .solution p{ margin:0 0 12px; font-size:.95rem; }
+  .solution strong{ color:var(--pine-deep); }
+
+  .tip{
+    background:var(--sienna-tint);
+    border:1px dashed #d8a988;
+    border-radius:12px;
+    padding:14px 18px;
+    margin:16px 0 4px;
+    font-size:.9rem;
+    color:#5b3013;
+  }
+  .tip .tip-label{
+    font-weight:700; color:var(--sienna);
+    display:block; margin-bottom:4px;
+    font-size:.78rem; letter-spacing:.05em;
+  }
+
+  /* ---------- stumble point (つまずきやすいポイント) ---------- */
+  .stumble{
+    background:var(--amber-tint);
+    border:1px dashed var(--amber-line);
+    border-radius:12px;
+    padding:14px 18px;
+    margin:14px 0;
+    font-size:.9rem;
+    color:#4a3400;
+  }
+  .stumble .stumble-label{
+    font-weight:700; color:var(--amber);
+    display:flex; align-items:center; gap:6px;
+    margin-bottom:5px;
+    font-size:.78rem; letter-spacing:.05em;
+  }
+  .stumble .stumble-label::before{ content:"💡"; font-size:.9rem; }
+
+  .result{
+    background:#eaf1e7;
+    border:1px solid #c7dcc1;
+    border-radius:10px;
+    padding:10px 16px;
+    margin:14px 0;
+    font-size:.94rem;
+  }
+
+  hr.thin{ border:none; border-top:1px solid var(--line); margin:22px 0; }
+
+  /* ---------- table (summary) ---------- */
+  .table-wrap{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    margin-top:20px;
+  }
+  table{ width:100%; border-collapse:collapse; font-size:.88rem; }
+  thead th{
+    background:var(--pine-deep); color:#f2f6ee;
+    text-align:left; padding:12px 16px; font-weight:600;
+    font-family:"Shippori Mincho", serif; letter-spacing:.02em;
+  }
+  tbody td{ padding:11px 16px; border-top:1px solid var(--line); }
+  tbody tr:nth-child(even){ background:var(--paper-tint); }
+  tbody td:first-child{ font-family:"Zen Old Mincho", serif; color:var(--pine); font-weight:700; width:44px; }
+
+  footer{
+    text-align:center; color:var(--ink-soft); font-size:.8rem;
+    padding:30px 20px 60px;
+  }
+
+  /* ---------- mobile ---------- */
+  .mobile-toggle{ display:none; }
+
+  @media (max-width: 900px){
+    .shell{ grid-template-columns: 1fr; }
+    .sidebar{
+      position:relative; height:auto; border-right:none;
+      border-bottom:1px solid var(--line);
+      padding:20px;
+    }
+    .sidebar{ display:none; }
+    .sidebar.open{ display:block; }
+    .mobile-toggle{
+      display:flex; align-items:center; gap:8px;
+      position:sticky; top:0; z-index:10;
+      background:var(--paper); border-bottom:1px solid var(--line);
+      padding:14px 20px; font-weight:700; color:var(--pine-deep);
+      cursor:pointer; font-family:"Shippori Mincho", serif;
+    }
+    main{ padding:28px 16px 80px; }
+    .problem, .concept{ padding:22px 18px; }
+    table{ font-size:.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    ☰ 目次を開く
+  </div>
+
+  <nav class="sidebar">
+    <p class="brand">解析力学 問題整理</p>
+    <p class="brand-sub">ハミルトン形式・正準変換・ハミルトン&ndash;ヤコビ方程式</p>
+
+    <div class="nav-group is-concept">
+      <div class="nav-group-title">基礎知識</div>
+      <a href="#concept-ch3"><span class="idx">§</span>ハミルトン形式の前提</a>
+      <a href="#concept-noether"><span class="idx">§</span>微小正準変換の考え方</a>
+      <a href="#concept-ch4"><span class="idx">§</span>HJ方程式の前提</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">第3章</div>
+      <a href="#p1"><span class="idx">01</span>H不変の証明</a>
+      <a href="#p2"><span class="idx">02</span>調和振動子（注2）</a>
+      <a href="#p3"><span class="idx">03</span>円筒座標（Q1）</a>
+      <a href="#p4"><span class="idx">04</span>参考書 問9-1</a>
+      <a href="#p5"><span class="idx">05</span>(3.42)の確認</a>
+      <a href="#p6"><span class="idx">06</span>恒等変換の確認</a>
+      <a href="#p7"><span class="idx">07</span>(3.43)の導出</a>
+      <a href="#p8"><span class="idx">08</span>例題3.1 極座標</a>
+      <a href="#p9"><span class="idx">09</span>例題3.2</a>
+      <a href="#p10"><span class="idx">10</span>(3.58)の確認</a>
+      <a href="#p11"><span class="idx">11</span>例題3.3</a>
+      <a href="#p12"><span class="idx">12</span>正準変数の確認</a>
+      <a href="#p13"><span class="idx">13</span>演習問題〔4〕</a>
+      <a href="#p14"><span class="idx">14</span>章末問題〔5〕</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">先生オリジナル</div>
+      <a href="#p15"><span class="idx">15</span>回転の生成子</a>
+      <a href="#p16"><span class="idx">16</span>ネーターの定理①</a>
+      <a href="#p17"><span class="idx">17</span>ネーターの定理②</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">第4章</div>
+      <a href="#p18"><span class="idx">18</span>例題4.1 自由粒子</a>
+      <a href="#p19"><span class="idx">19</span>演習問題〔1〕</a>
+      <a href="#p20"><span class="idx">20</span>例題4.2 \(J=\oint p\,dx\)</a>
+      <a href="#p21"><span class="idx">21</span>Jの断熱不変性</a>
+      <a href="#p22"><span class="idx">22</span>§4.6 ヤコビアン</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">まとめ</div>
+      <a href="#summary"><span class="idx">▤</span>全問題対応表</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <div class="hero">
+      <div class="hero-eyebrow">Analytical Mechanics Notebook</div>
+      <h1>解析力学 問題整理と解説<br>ハミルトン形式・正準変換・作用変数</h1>
+      <div class="hero-tags">
+        <span>第3章：正準変換</span>
+        <span>先生オリジナル：ネーターの定理</span>
+        <span>第4章：ハミルトン&ndash;ヤコビ方程式</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:var(--sky-tint);border:1px solid var(--sky-line);"></span>
+        <div><strong>基礎知識</strong>その章・問題を理解するための前提となる公式や考え方</div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:var(--paper-tint);border:1px solid var(--pine);"></span>
+        <div><strong>問題文</strong>ノート原文のままの設問</div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:var(--amber-tint);border:1px dashed var(--amber-line);"></span>
+        <div><strong>つまずきやすいポイント</strong>計算が飛躍している箇所を一段階ずつ補足</div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:var(--sienna-tint);border:1px dashed #d8a988;"></span>
+        <div><strong>別解・補足</strong>より簡潔な方法や、発展的な注意点</div>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch" style="background:#eaf1e7;border:1px solid #c7dcc1;"></span>
+        <div><strong>結論</strong>その問題で最終的に示されたこと</div>
+      </div>
+    </div>
+
+    <div class="toc" id="toc">
+      <p class="toc-heading">目次</p>
+      <div class="toc-grid">
+        <div class="toc-group is-concept">
+          <p class="toc-group-title">基礎知識</p>
+          <a href="#concept-ch3"><span class="idx">&sect;</span>ハミルトン形式の前提</a>
+          <a href="#concept-noether"><span class="idx">&sect;</span>微小正準変換の考え方</a>
+          <a href="#concept-ch4"><span class="idx">&sect;</span>HJ方程式の前提</a>
+        </div>
+        <div class="toc-group">
+          <p class="toc-group-title">第3章</p>
+          <a href="#p1"><span class="idx">01</span>H不変の証明</a>
+          <a href="#p2"><span class="idx">02</span>調和振動子（注2）</a>
+          <a href="#p3"><span class="idx">03</span>円筒座標（Q1）</a>
+          <a href="#p4"><span class="idx">04</span>参考書 問9-1</a>
+          <a href="#p5"><span class="idx">05</span>(3.42)の確認</a>
+          <a href="#p6"><span class="idx">06</span>恒等変換の確認</a>
+          <a href="#p7"><span class="idx">07</span>(3.43)の導出</a>
+          <a href="#p8"><span class="idx">08</span>例題3.1 極座標</a>
+          <a href="#p9"><span class="idx">09</span>例題3.2</a>
+          <a href="#p10"><span class="idx">10</span>(3.58)の確認</a>
+          <a href="#p11"><span class="idx">11</span>例題3.3</a>
+          <a href="#p12"><span class="idx">12</span>正準変数の確認</a>
+          <a href="#p13"><span class="idx">13</span>演習問題〔4〕</a>
+          <a href="#p14"><span class="idx">14</span>章末問題〔5〕</a>
+        </div>
+        <div class="toc-group">
+          <p class="toc-group-title">先生オリジナル</p>
+          <a href="#p15"><span class="idx">15</span>回転の生成子</a>
+          <a href="#p16"><span class="idx">16</span>ネーターの定理①</a>
+          <a href="#p17"><span class="idx">17</span>ネーターの定理②</a>
+        </div>
+        <div class="toc-group">
+          <p class="toc-group-title">第4章</p>
+          <a href="#p18"><span class="idx">18</span>例題4.1 自由粒子</a>
+          <a href="#p19"><span class="idx">19</span>演習問題〔1〕</a>
+          <a href="#p20"><span class="idx">20</span>例題4.2 \(J=\oint p\,dx\)</a>
+          <a href="#p21"><span class="idx">21</span>Jの断熱不変性</a>
+          <a href="#p22"><span class="idx">22</span>§4.6 ヤコビアン</a>
+        </div>
+        <div class="toc-group">
+          <p class="toc-group-title">まとめ</p>
+          <a href="#summary"><span class="idx">&#9638;</span>全問題対応表</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 第3章：基礎知識 ============ -->
+    <h2 class="chapter is-concept" id="concept-ch3"><span class="chap-no">基礎知識</span>ハミルトン形式の前提</h2>
+    <a class="back-to-toc" href="#toc">&uarr; 目次に戻る</a>
+
+    <div class="concept">
+      <span class="concept-label">STEP 1｜記号の確認</span>
+      <p>この章では、それまで使っていたラグランジュ形式（座標 x と速度 \(\dot x\) を独立変数として扱う）から、ハミルトン形式（座標 x と運動量 p を独立変数として扱う）へ移ります。混乱しやすい記号をまず整理します。</p>
+      <table>
+        <tr><th>記号</th><th>意味</th></tr>
+        <tr><td>x（または q）</td><td>一般化座標。直交座標とは限らず、角度や長さなど運動を表すのに便利な変数でよい。</td></tr>
+        <tr><td>\(\dot x\)（または \(\dot q\)）</td><td>座標の時間微分＝一般化速度。dx/dt のこと。</td></tr>
+        <tr><td>p</td><td>x に共役な一般化運動量。定義は \(p=\partial L/\partial \dot x\)。x=位置なら \(p=m\dot x\)（普通の運動量）になるが、x=角度なら p は角運動量になるなど、x の取り方によって物理的な意味が変わる。</td></tr>
+        <tr><td>\(L(x,\dot x,t)\)</td><td>ラグランジアン＝T−U（運動エネルギー−ポテンシャル）。x と \(\dot x\) を独立変数として扱う（ただし実際には \(\dot x=dx/dt\) という拘束がある）。</td></tr>
+        <tr><td>H(x,p,t)</td><td>ハミルトニアン。x と p を完全に独立な変数として扱える点がラグランジアンと異なる（第3章末のまとめ参照）。</td></tr>
+      </table>
+
+      <h4>オイラー・ラグランジュ方程式（既習事項の確認）</h4>
+      <p>ラグランジュ形式での運動方程式は次の形でした。以降の全ての問題の出発点になるので確認しておきます。</p>
+      $$\frac{d}{dt}\left(\frac{\partial L}{\partial \dot x}\right) = \frac{\partial L}{\partial x}$$
+
+      <h4>ハミルトニアンの定義（ルジャンドル変換）</h4>
+      <p>\(p=\partial L/\partial \dot x\) を使って、\(\dot x\) を p に置き換える手続きが「ルジャンドル変換」です。ハミルトニアンは次のように定義されます。</p>
+      $$H(x,p,t) = p\dot x - L(x,\dot x,t)$$
+      <p>ここで \(\dot x\) は p の関数として（\(p=\partial L/\partial \dot x\) を逆に解いて）x, p, t で表しておきます。この H を全微分して、オイラー・ラグランジュ方程式と p の定義を使うと、次の「正準方程式（ハミルトンの運動方程式）」が得られます。これは今後の全ての問題で当たり前のように使われる道具です。</p>
+      $$\dot x = \frac{\partial H}{\partial p}, \qquad \dot p = -\frac{\partial H}{\partial x}$$
+      <div class="stumble">
+        <span class="stumble-label">符号がつまずきやすい</span>
+        \(\dot p\) の式にだけマイナスが付くのを忘れがちです。「x と p は対等な変数だが、片方だけ符号が反転する」形になっているのが正準方程式の特徴だと覚えておくと、問1・問2のような確認問題でミスを防げます。
+      </div>
+
+      <h4>正準変換とは何か・なぜ考えるのか</h4>
+      <p>正準変換とは、(x,p) から新しい変数の組 (X,P) へ移ったときに、新しい変数についても同じ形の正準方程式 \(\dot X=\partial H'/\partial P,\ \dot P=-\partial H'/\partial X\) が成り立つような変換のことです。うまく (X,P) を選べば、H′ がとても簡単な形（例えば P だけの関数、あるいは 0）になり、運動方程式が積分するだけで解けるようになります。これが正準変換を学ぶ動機です（第4章のハミルトン・ヤコビ方程式へつながります）。</p>
+
+      <h4>母関数（generating function）の4パターン</h4>
+      <p>正準変換を作る一番確実な方法が「母関数」を使う方法です。ノートでは W, W′, W″, W‴ という4種類の記号が出てきますが、これは新旧どちらの変数を独立変数に選ぶかで4通りに分類されているだけです（教科書によっては F₁〜F₄ と呼ばれます）。対応関係を先にまとめておきます。</p>
+      <table>
+        <tr><th>ノートの記号</th><th>独立変数</th><th>関係式</th></tr>
+        <tr><td>\(W(x,X,t)\)</td><td>古い座標 x・新しい座標 X</td><td>\(p=\partial W/\partial x,\ -P=\partial W/\partial X\)</td></tr>
+        <tr><td>\(W'(p,X,t)\)</td><td>古い運動量 p・新しい座標 X</td><td>\(x=-\partial W'/\partial p,\ -P=\partial W'/\partial X\)</td></tr>
+        <tr><td>\(W''(x,P,t)\)</td><td>古い座標 x・新しい運動量 P</td><td>\(p=\partial W''/\partial x,\ X=\partial W''/\partial P\)</td></tr>
+        <tr><td>\(W'''(p,P,t)\)</td><td>古い運動量 p・新しい運動量 P</td><td>\(x=-\partial W'''/\partial p,\ X=\partial W'''/\partial P\)</td></tr>
+      </table>
+      <p>どのパターンでも、新旧のハミルトニアンの関係は H′ = H + (母関数の t 偏微分) です。母関数が t を陽に含まなければ H′=H（ハミルトニアンの値は変わらない）となります。</p>
+
+      <h4>係数比較という考え方</h4>
+      <p>問5・問7・問14などで繰り返し使われる手順は次の通りです。①ある物理量（例えば L や W）を2通りの方法で全微分する。②同じ微分 dx, dP, dt などの係数を両辺で比較する。③一致する条件から関係式（\(p=\partial W/\partial x\) など）を導く。これは、ある量が「完全微分（全微分）」として書けるかどうかを調べる操作で、熱力学のマクスウェルの関係式を導くときと同じ考え方です。</p>
+
+      <h4>正準変換の判定条件</h4>
+      <p>問9・問10・問12で使われる (3.57)・(3.64) は、「ある変換が正準変換になっているかどうか」を直接チェックするための条件です。母関数を経由せずに X(x,p), P(x,p) の形が先に与えられたとき、次のポアソン括弧（1自由度の場合はヤコビアンと同じ）を計算することで正準変換かどうかを判定できます。</p>
+      $$\{X,P\}_{x,p} \equiv \frac{\partial X}{\partial x}\frac{\partial P}{\partial p} - \frac{\partial X}{\partial p}\frac{\partial P}{\partial x} = 1$$
+      <p>この量は、(x,p) 平面上の微小な面積要素が (X,P) 平面でどれだけ拡大・縮小されるかを表すヤコビアン \(\partial(X,P)/\partial(x,p)\) そのものです。これが 1 になることが「dW=p dx−P dX という量が完全微分になっている」（＝正準変換になっている）ための条件です。</p>
+    </div>
+
+    <!-- ============ 第3章 ============ -->
+    <h2 class="chapter"><span class="chap-no">第3章</span>ハミルトン形式・正準変換</h2>
+    <a class="back-to-toc" href="#toc">&uarr; 目次に戻る</a>
+    <p class="chapter-note">相空間 (x, p) 上での運動の記述から出発し、ラグランジアン・ハミルトニアン・正準変換・母関数までを扱う。</p>
+
+    <div class="problem" id="p1">
+      <div class="problem-head">
+        <div class="p-badge">01</div>
+        <div class="p-meta">
+          <div class="p-source">3章 &middot; 問1</div>
+          <div class="p-title">ハミルトニアンの保存</div>
+        </div>
+      </div>
+      <div class="statement"><p>H(x, p, t) = H(x, p) のとき、dH/dt = 0 であることを示せ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p>ハミルトニアン H が陽に時間を含まない場合を考える。全微分をとると</p>
+        $$\frac{dH}{dt} = \frac{\partial H}{\partial x}\dot x + \frac{\partial H}{\partial p}\dot p$$
+        <p>ここで正準方程式 \(\dot x = \partial H/\partial p,\ \dot p = -\partial H/\partial x\) を代入すると</p>
+        $$\frac{dH}{dt} = \frac{\partial H}{\partial x}\cdot\frac{\partial H}{\partial p} + \frac{\partial H}{\partial p}\cdot\left(-\frac{\partial H}{\partial x}\right) = 0$$
+        <div class="result">∴ H が t を陽に含まなければ、H は運動の保存量（＝エネルギー）である。</div>
+        <div class="stumble">
+          <span class="stumble-label">なぜこれが重要か</span>
+          H(x,p,t) が「陽に t を含む」とは、変数 x,p の時間変化を通じてではなく、式そのものに t が直接出てくる場合（例：ばね定数が時間で変化する）を指します。この問題は「H に t が直接出てこなければ、運動の途中で H の値は変わらない＝エネルギー保存則」という、力学の基本原理をハミルトン形式で示したものです。問14ではこの前提（H が t を陽に含む）が崩れる例を扱います。
+        </div>
+      </div>
+    </div>
+
+    <div class="problem" id="p2">
+      <div class="problem-head">
+        <div class="p-badge">02</div>
+        <div class="p-meta">
+          <div class="p-source">3章 &middot; 注2〔例〕調和振動子（P.25）</div>
+          <div class="p-title">L, p, H, 正準方程式を求める（4小問）</div>
+        </div>
+      </div>
+      <div class="statement">
+        <p>\(T=(m/2)\dot x^2\)，\(U=(1/2)kx^2\) のとき</p>
+        <p>① ラグランジアンを書いて運動方程式を導け　② x と共役な運動量 p を導け　③ ハミルトニアンを導け　④ 正準方程式を書け</p>
+      </div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p><strong>① ラグランジアンと運動方程式</strong></p>
+        $$L = T - U = \frac{m}{2}\dot x^2 - \frac{1}{2}kx^2$$
+        <p>オイラー・ラグランジュ方程式 \(\dfrac{d}{dt}\!\left(\dfrac{\partial L}{\partial \dot x}\right)=\dfrac{\partial L}{\partial x}\) より</p>
+        $$m\ddot x = -kx$$
+        <p><strong>② 共役運動量</strong></p>
+        $$p = \frac{\partial L}{\partial \dot x} = m\dot x$$
+        <p><strong>③ ハミルトニアン</strong>（ルジャンドル変換 \(H=p\dot x-L\)）</p>
+        $$H = p\dot x - L = m\dot x^2 - \left(\frac{m}{2}\dot x^2 - \frac{1}{2}kx^2\right) = \frac{m}{2}\dot x^2 + \frac{1}{2}kx^2 = \frac{p^2}{2m} + \frac{1}{2}kx^2$$
+        <div class="stumble">
+          <span class="stumble-label">\(\dot x\) を p で置き換える手順</span>
+          \(H=p\dot x-L\) を計算した直後の式にはまだ \(\dot x\) が残っています（\(m\dot x^2/2+kx^2/2\) の形）。ここで②の \(p=m\dot x\) を \(\dot x=p/m\) と逆に解いて代入し、\(\dot x\) をすべて消去して p だけで書き直す、というひと手間が「ルジャンドル変換」の実体です。うっかり \(\dot x\) のまま答えにしないよう注意しましょう。
+        </div>
+        <p><strong>④ 正準方程式</strong></p>
+        $$\dot x = \frac{\partial H}{\partial p} = \frac{p}{m}\ \Rightarrow\ m\dot x = p \quad(イ),\qquad \dot p = -\frac{\partial H}{\partial x} = -kx \quad(ロ)$$
+        <p>(イ)(ロ) より \(m\ddot x=-kx\) となり①と一致する。</p>
+        <div class="tip">
+          <span class="tip-label">注2・注3（相空間の性質）</span>
+          H = p²/2m + (1/2)kx² = 一定（＝E）は相空間上で楕円を表す。軌跡は等エネルギー面上を右回りに進み、互いに交わらない（初期条件が軌道を一意に決めるため）。
+        </div>
+      </div>
+    </div>
+
+    <div class="problem" id="p3">
+      <div class="problem-head">
+        <div class="p-badge">03</div>
+        <div class="p-meta">
+          <div class="p-source">3章 &middot; Q1（円筒座標, P.16）</div>
+          <div class="p-title">動ポテンシャル下の質点運動（2小問）</div>
+        </div>
+      </div>
+      <div class="statement">
+        <p>動ポテンシャル U(z) = mgz のもとで質点が運動する。円筒座標 x = r cosφ, y = r sinφ, z = z を用いて</p>
+        <p>① ラグランジアンを書け　② r, φ, z にそれぞれ共役な運動量 \(p_r,\ p_\phi,\ p_z\) を求めよ</p>
+      </div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p><strong>① ラグランジアン</strong></p>
+        $$\dot x = \dot r\cos\phi - r\dot\phi\sin\phi,\qquad \dot y = \dot r\sin\phi + r\dot\phi\cos\phi$$
+        <p>これをそれぞれ2乗して展開する。</p>
+        $$\dot x^2 = \dot r^2\cos^2\phi - 2r\dot r\dot\phi\cos\phi\sin\phi + r^2\dot\phi^2\sin^2\phi$$
+        $$\dot y^2 = \dot r^2\sin^2\phi + 2r\dot r\dot\phi\sin\phi\cos\phi + r^2\dot\phi^2\cos^2\phi$$
+        <p>両辺を足し合わせると、中央のクロス項（\(-2r\dot r\dot\phi\cos\phi\sin\phi\) と \(+2r\dot r\dot\phi\sin\phi\cos\phi\)）が符号違いでちょうど打ち消し合う。</p>
+        $$\dot x^2+\dot y^2 = \dot r^2(\cos^2\phi+\sin^2\phi) + r^2\dot\phi^2(\sin^2\phi+\cos^2\phi)$$
+        <p>ここで三角関数の恒等式 cos²φ+sin²φ=1 を使うと</p>
+        $$\dot x^2+\dot y^2 = \dot r^2 + r^2\dot\phi^2$$
+        <div class="stumble">
+          <span class="stumble-label">この展開の計算方法</span>
+          \(\dot x^2+\dot y^2\) を計算するときは、上のように \(\dot x^2\), \(\dot y^2\) をそれぞれ丁寧に展開してから足すと、クロス項（\(\dot r\dot\phi\) の項）が打ち消し合い、きれいに \(\dot r^2+r^2\dot\phi^2\) にまとまります。実際に手を動かして展開しておくと、極座標に関する他の問題（問8など）でも同じ計算パターンが使えます。
+        </div>
+        <p>運動エネルギー \(T=(m/2)(\dot x^2+\dot y^2+\dot z^2)\) にこれを代入し、ポテンシャル \(U(z)=mgz\) を引くと</p>
+        $$L = T - U = \frac{m}{2}\left(\dot r^2 + r^2\dot\phi^2 + \dot z^2\right) - mgz$$
+        <p><strong>② 共役運動量</strong></p>
+        <p>それぞれの一般化座標 r, φ, z について、共役運動量の定義 \(p=\partial L/\partial \dot q\)（座標の時間微分でLを偏微分する）を、q=r,φ,z のそれぞれについて計算する。</p>
+        $$p_r = \frac{\partial L}{\partial \dot r} = \frac{\partial}{\partial \dot r}\left(\frac{m}{2}\dot r^2\right) = m\dot r$$
+        $$p_\phi = \frac{\partial L}{\partial \dot \phi} = \frac{\partial}{\partial \dot \phi}\left(\frac{m}{2}r^2\dot\phi^2\right) = mr^2\dot\phi$$
+        $$p_z = \frac{\partial L}{\partial \dot z} = \frac{\partial}{\partial \dot z}\left(\frac{m}{2}\dot z^2\right) = m\dot z$$
+        <div class="tip"><span class="tip-label">補足</span>\(p_\phi=mr^2\dot\phi\) は角運動量に相当する（半径 r・速度 \(r\dot\phi\) の円運動をする質点の角運動量 \(mr\cdot(r\dot\phi)\) と同じ形）。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p4">
+      <div class="problem-head">
+        <div class="p-badge">04</div>
+        <div class="p-meta">
+          <div class="p-source">参考書 P.138 問9-1</div>
+          <div class="p-title">L, p, H, 正準方程式（4小問）</div>
+        </div>
+      </div>
+      <div class="statement">
+        <p>\(L(\ell,\dot\ell)=(1/2)m\dot\ell^2-mg\ell\) のとき</p>
+        <p>① ラグランジュ方程式　② ℓ の共役運動量　③ ハミルトニアン　④ 正準方程式</p>
+      </div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p><strong>① ラグランジュ方程式</strong></p>
+        <p>\(L(\ell,\dot\ell)=(1/2)m\dot\ell^2-mg\ell\) を \(\dot\ell\) で偏微分すると（ℓ を定数とみなして \(\dot\ell\) だけの関数として微分する）</p>
+        $$\frac{\partial L}{\partial \dot\ell} = \frac{\partial}{\partial \dot\ell}\left(\frac{1}{2}m\dot\ell^2\right) - \frac{\partial}{\partial \dot\ell}(mg\ell) = m\dot\ell - 0 = m\dot\ell$$
+        <p>次に L を ℓ で偏微分すると（今度は \(\dot\ell\) を定数とみなす）</p>
+        $$\frac{\partial L}{\partial \ell} = \frac{\partial}{\partial \ell}\left(\frac{1}{2}m\dot\ell^2\right) - \frac{\partial}{\partial \ell}(mg\ell) = 0 - mg = -mg$$
+        <p>オイラー・ラグランジュ方程式 \(\dfrac{d}{dt}\!\left(\dfrac{\partial L}{\partial \dot\ell}\right)=\dfrac{\partial L}{\partial \ell}\) に、左辺は \(\dfrac{d}{dt}(m\dot\ell)=m\ddot\ell\)（m は定数なので時間微分の外に出せる）、右辺は −mg を代入すると</p>
+        $$m\ddot\ell = -mg$$
+        <p><strong>② 共役運動量</strong></p>
+        <p>共役運動量の定義 \(p=\partial L/\partial \dot\ell\) は①ですでに計算済みなので、そのまま</p>
+        $$p = m\dot\ell$$
+        <p><strong>③ ハミルトニアン</strong></p>
+        <p>ハミルトニアンの定義 \(H=p\dot\ell-L\) に、まず \(p=m\dot\ell\) を \(\dot\ell=p/m\) と逆に解いてから代入していく。まず \(p\dot\ell\) の項は</p>
+        $$p\dot\ell = p\cdot\frac{p}{m} = \frac{p^2}{m}$$
+        <p>次に \(L=(1/2)m\dot\ell^2-mg\ell\) の中の \(\dot\ell^2\) にも \(\dot\ell=p/m\) を代入すると</p>
+        $$\frac{1}{2}m\dot\ell^2 = \frac{1}{2}m\left(\frac{p}{m}\right)^2 = \frac{1}{2}\cdot\frac{p^2}{m} = \frac{p^2}{2m}$$
+        <p>したがって</p>
+        $$H = p\dot\ell - L = \frac{p^2}{m} - \left(\frac{p^2}{2m}-mg\ell\right) = \frac{p^2}{m} - \frac{p^2}{2m} + mg\ell = \frac{p^2}{2m} + mg\ell$$
+        <p><strong>④ 正準方程式</strong></p>
+        <p>H=p²/2m+mgℓ を p で偏微分する（ℓ を定数とみなす）と</p>
+        $$\dot\ell = \frac{\partial H}{\partial p} = \frac{\partial}{\partial p}\left(\frac{p^2}{2m}\right) = \frac{2p}{2m} = \frac{p}{m}$$
+        <p>H を ℓ で偏微分する（p を定数とみなす）と</p>
+        $$\dot p = -\frac{\partial H}{\partial \ell} = -\frac{\partial}{\partial \ell}(mg\ell) = -mg$$
+        <p>この2式から p を消去して1本の式にする。\(\dot\ell=p/m\) の両辺を時間で微分すると \(\ddot\ell=\dot p/m\)。ここに \(\dot p=-mg\) を代入すると</p>
+        $$\ddot\ell = \frac{\dot p}{m} = \frac{-mg}{m} = -g \quad\Rightarrow\quad m\ddot\ell = -mg$$
+        <div class="result">①と同じ結果 \(m\ddot\ell=-mg\)（自由落下の運動方程式）が得られた。相空間 (ℓ, p) では \(H=p^2/2m+mg\ell=\)一定 という式が、ℓ を横軸・p を縦軸にとったときの放物線を描く。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p5">
+      <div class="problem-head">
+        <div class="p-badge">05</div>
+        <div class="p-meta">
+          <div class="p-source">3章 &middot; Q1</div>
+          <div class="p-title">(3.42) の確認</div>
+        </div>
+      </div>
+      <div class="statement"><p>\(W''=\displaystyle\sum_i P_iX_i + W(x,X,t) = W''(x,P,t)\)　ただし \(-P_i=\partial W/\partial X_i\) とするとき、(3.42) を確かめよ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">この問題のねらい</span>
+          基礎知識のところで紹介した「\(W(x,X,t)\) 型」の母関数から、「\(W''(x,P,t)\) 型」の母関数を作る手続きを確認する問題です。X をそのまま使うのではなく、\(P=-\partial W/\partial X\) を使って X の代わりに P を独立変数にする（ルジャンドル変換）というのが \(\sum_i P_iX_i\) を足す操作の意味です。
+        </div>
+        <p>W″ を全微分すると</p>
+        $$dW'' = \sum_i X_i dP_i + \sum_i p_i dx_i - (H-H')dt$$
+        <div class="stumble">
+          <span class="stumble-label">この式の作り方</span>
+          \(W=\sum_i p_iX_i\) に対して \(p\,dx-P\,dX-(H-H')dt=dW\) （母関数 W の定義そのもの）を思い出し、\(W''=\sum_i P_iX_i+W\) の両辺を全微分します。\(d(\sum_i P_iX_i)=\sum_i X_idP_i+\sum_i P_idX_i\) となるので、dW 中の \(-\sum_i P_idX_i\) の項とちょうど打ち消し合い、\(\sum_i X_idP_i\) だけが残ります。この「打ち消し合わせて欲しい変数を消す」のがルジャンドル変換の目的です。
+        </div>
+        <p>一方、W″(x,P,t) を偏微分の形で書くと</p>
+        $$dW'' = \sum_i \frac{\partial W''}{\partial P_i}dP_i + \sum_i \frac{\partial W''}{\partial x_i}dx_i + \frac{\partial W''}{\partial t}dt$$
+        <p>係数を比較して</p>
+        $$X_i = \frac{\partial W''}{\partial P_i},\qquad p_i = \frac{\partial W''}{\partial x_i},\qquad -(H-H') = \frac{\partial W''}{\partial t}$$
+      </div>
+    </div>
+
+    <div class="problem" id="p6">
+      <div class="problem-head">
+        <div class="p-badge">06</div>
+        <div class="p-meta">
+          <div class="p-source">3章 &middot; Q2</div>
+          <div class="p-title">恒等変換の確認</div>
+        </div>
+      </div>
+      <div class="statement"><p>\(W''=\displaystyle\sum_i P_iX_i\) が恒等変換になることを確かめよ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">解く前に：どの公式を使うか</span>
+          問5で導いた \(p=\partial W''/\partial x,\ X=\partial W''/\partial P\) をそのまま使います。ここでは \(W''=\sum_i P_iX_i\) を「x を含まない、単純な P と X の積の形」とみなして偏微分するだけです。
+        </div>
+        $$X_i = x_i,\qquad p_i = P_i$$
+        <div class="result">新旧の変数がそのまま等しくなる＝恒等変換である。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p7">
+      <div class="problem-head">
+        <div class="p-badge">07</div>
+        <div class="p-meta">
+          <div class="p-source">3章 &middot; Q3</div>
+          <div class="p-title">(3.43) の導出</div>
+        </div>
+      </div>
+      <div class="statement"><p>\(W'''=W-\displaystyle\sum_i p_ix_i+\sum_i P_iX_i = W'''(p,P,t)\) を導け。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">この問題のねらい</span>
+          今度は x も P も独立変数から外し、p と P だけで書けるようにしたいので、\(-\sum_i p_ix_i\)（xを消す）と \(+\sum_i P_iX_i\)（Xを消す）の両方をまとめて W に足します。基礎知識でまとめた「\(W'''(p,P,t)\) 型」の母関数がここで作られます。
+        </div>
+        <p>\(W'''=W-\sum_i p_ix_i+\sum_i P_iX_i\) を全微分すると、\(dW=p\,dx-P\,dX-(H-H')dt\) と \(d(-\sum_i p_ix_i)=-\sum_i x_idp_i-\sum_i p_idx_i\)，\(d(\sum_i P_iX_i)=\sum_i X_idP_i+\sum_i P_idX_i\) を足し合わせて、p dx の項と −P dX の項がちょうど打ち消し合い</p>
+        $$dW''' = -\sum_i x_i\,dp_i + \sum_i X_i\,dP_i - (H-H')dt$$
+        <p>これを W‴(p,P,t) の全微分 \(dW'''=\sum_i(\partial W'''/\partial p_i)dp_i+\sum_i(\partial W'''/\partial P_i)dP_i+(\partial W'''/\partial t)dt\) と係数比較すると</p>
+        $$x_i = -\frac{\partial W'''}{\partial p_i},\qquad X_i = \frac{\partial W'''}{\partial P_i}$$
+        <div class="result">これは問9で使われている関係式 \(x=-\partial W'''/\partial p,\ X=\partial W'''/\partial P\) と一致する。x, X がともに p, P だけの関数として（独立変数の x を経由せずに）表せる点が、この母関数の意味である。</div>
+        <div class="tip"><span class="tip-label">まとめ（ノートの結論）</span>L では \(\dot x\) と x は独立ではない（拘束 \(\dot x=dx/dt\) あり）。H では x と p は完全に独立な変数として扱える。これが正準形式の本質的な利点。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p8">
+      <div class="problem-head">
+        <div class="p-badge">08</div>
+        <div class="p-meta">
+          <div class="p-source">例題3.1（P.39）</div>
+          <div class="p-title">極座標への正準変換</div>
+        </div>
+      </div>
+      <div class="statement"><p>(x, y) → (X, Y) = (r cosφ, r sinφ) の正準変換を、ルジャンドル型母関数 \(W'=W'(p,X,t)\)（\(p=\partial W/\partial x\) より \(W'=-px+W\)）を用いて実行し、\(T=(1/2m)(p_x^2+p_y^2)\) を極座標の運動量で表せ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p>母関数を \(W' = -xp_x - yp_y = -r\cos\phi\, p_x - r\sin\phi\, p_y\) とおく。\(X=-\partial W'/\partial p\) より</p>
+        $$p_r = p_x\cos\phi + p_y\sin\phi,\qquad p_\phi = -r\sin\phi\, p_x + r\cos\phi\, p_y\ (=xp_y-yp_x：\text{角運動量})$$
+        <div class="stumble">
+          <span class="stumble-label">なぜマイナス符号がつくのか</span>
+          基礎知識の表にある通り、\(W'(p,X,t)\) 型では \(x=-\partial W'/\partial p\) という関係を使います。\(W'=-xp_x-yp_y\) という式自体がすでに「xをpの関数として消すための」ルジャンドル変換の形になっているため、通常のW型（マイナスなし）と符号の付き方が違って見えます。ここで焦らず基礎知識の対応表と照らし合わせるのがコツです。
+        </div>
+        <p>\(\partial W'/\partial t=0\) なので \(H'(r,\phi,t)=H(x,y,t)\)（母関数が時間を陽に含まないのでハミルトニアンの値は変わらない）。したがって、T の式の中の \(p_x, p_y\) を \(p_r, p_\phi\) で表せばよい。まず \(p_r^2,\ p_\phi^2/r^2\) をそれぞれ計算すると</p>
+        $$p_r^2 = (p_x\cos\phi+p_y\sin\phi)^2 = p_x^2\cos^2\phi + 2p_xp_y\cos\phi\sin\phi + p_y^2\sin^2\phi$$
+        $$\frac{p_\phi^2}{r^2} = \frac{(-r\sin\phi\,p_x+r\cos\phi\,p_y)^2}{r^2} = p_x^2\sin^2\phi - 2p_xp_y\sin\phi\cos\phi + p_y^2\cos^2\phi$$
+        <p>この2式を足すと、クロス項（\(\pm 2p_xp_y\cos\phi\sin\phi\) の項）が符号違いで打ち消し合い</p>
+        $$p_r^2 + \frac{p_\phi^2}{r^2} = p_x^2(\cos^2\phi+\sin^2\phi) + p_y^2(\sin^2\phi+\cos^2\phi) = p_x^2 + p_y^2$$
+        <p>ゆえに \(p_x^2+p_y^2=p_r^2+p_\phi^2/r^2\) が成り立つので、これを \(T=(1/2m)(p_x^2+p_y^2)\) に代入すると</p>
+        $$T = \frac{1}{2m}(p_x^2+p_y^2) = \frac{1}{2m}\left(p_r^2 + \frac{1}{r^2}p_\phi^2\right)$$
+        <div class="tip"><span class="tip-label">簡単な方法</span>これは極座標運動エネルギーの標準形。x=r cosφ, y=r sinφ から直接 \(\dot x^2+\dot y^2=\dot r^2+r^2\dot\phi^2\) を計算し \(p_r=m\dot r,\ p_\phi=mr^2\dot\phi\) を代入しても同じ結果が最短で得られる（問題03の手順と同じ）。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p9">
+      <div class="problem-head">
+        <div class="p-badge">09</div>
+        <div class="p-meta">
+          <div class="p-source">例題3.2（P.35）</div>
+          <div class="p-title">(X,P)=(p,−x) の正準性</div>
+        </div>
+      </div>
+      <div class="statement"><p>(x, p) → (X, P) = (p, −x) が正準変換であることを確かめよ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">この問題のねらい</span>
+          「座標と運動量を入れ替える」という一見奇妙な変換も、実は正準変換になっているという有名な例です。x と p を対等に扱えるハミルトン形式ならではの性質を確認します。
+        </div>
+        <p>母関数 \(W'''(p,P,t)=pP\) を用いる。この母関数は独立変数 p, P で書かれており、基礎知識の表の関係式 \(x=-\partial W'''/\partial p,\ X=\partial W'''/\partial P\) をそのまま適用できる。</p>
+        $$X = \frac{\partial W'''}{\partial P} = \frac{\partial}{\partial P}(pP) = p,\qquad x = -\frac{\partial W'''}{\partial p} = -\frac{\partial}{\partial p}(pP) = -P$$
+        <p>2つ目の式 x=−P を P について解くと P=−x となり、たしかに問題文の (X,P)=(p,−x) が母関数から導かれることが確認できる。</p>
+        <p>次に、この (X,P)=(p,−x) が実際に正準方程式を満たすことを直接確かめる。もとの正準方程式 \(\dot x=\partial H/\partial p,\ \dot p=-\partial H/\partial x\) を使うと</p>
+        $$\dot X = \dot p = -\frac{\partial H}{\partial x} \quad\text{（もとの正準方程式より）}$$
+        $$\dot P = -\dot x = -\frac{\partial H}{\partial p} \quad\text{（もとの正準方程式より）}$$
+        <p>一方、H は X=p, P=−x の変換で値が変わらない（H′(X,P)=H(x,p)）ので、x=−P, p=X を代入して H を X, P の関数とみなすと、連鎖律により</p>
+        $$\frac{\partial H'}{\partial P} = \frac{\partial H}{\partial x}\cdot\frac{\partial x}{\partial P} = \frac{\partial H}{\partial x}\cdot(-1) = -\frac{\partial H}{\partial x},\qquad \frac{\partial H'}{\partial X} = \frac{\partial H}{\partial p}\cdot\frac{\partial p}{\partial X} = \frac{\partial H}{\partial p}\cdot 1 = \frac{\partial H}{\partial p}$$
+        <p>これらを比較すると</p>
+        $$\dot X = -\frac{\partial H}{\partial x} = \frac{\partial H'}{\partial P},\qquad \dot P = -\frac{\partial H}{\partial p} = -\frac{\partial H'}{\partial X}$$
+        <div class="result">(X,P)=(p,−x) は正準方程式 \(\dot X=\partial H'/\partial P,\ \dot P=-\partial H'/\partial X\) をどちらも満たすので、正準変数の組であることが確かめられた（(3.51)）。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p10">
+      <div class="problem-head">
+        <div class="p-badge">10</div>
+        <div class="p-meta">
+          <div class="p-source">例題3.2内 &middot; Q1</div>
+          <div class="p-title">(3.58) の確認</div>
+        </div>
+      </div>
+      <div class="statement"><p>(3.58) を同様にして確かめよ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">この問題のねらい</span>
+          正準方程式 \(\dot X=\partial H/\partial P\)（H は元の変数でも新しい変数でも同じ値をとる）を、連鎖律（chain rule）を使って「元の変数 x, p の偏微分」で書き直し、両辺を任意の H について比較することで、基礎知識の判定条件 {X,P}=1 が導かれることを確認する問題です。
+        </div>
+        <p>\(\dot X=\dot x(\partial X/\partial x)+\dot p(\partial X/\partial p)\) に、もとの正準方程式 \(\dot x=\partial H/\partial p,\ \dot p=-\partial H/\partial x\) を代入すると</p>
+        $$\dot X = \frac{\partial X}{\partial x}\frac{\partial H}{\partial p} - \frac{\partial X}{\partial p}\frac{\partial H}{\partial x} \quad (\text{イ})$$
+        <p>一方、H を (X,P) を経由した合成関数とみて連鎖律を使うと</p>
+        $$\frac{\partial H}{\partial p} = \frac{\partial H}{\partial X}\frac{\partial X}{\partial p} + \frac{\partial H}{\partial P}\frac{\partial P}{\partial p},\qquad \frac{\partial H}{\partial x} = \frac{\partial H}{\partial X}\frac{\partial X}{\partial x} + \frac{\partial H}{\partial P}\frac{\partial P}{\partial x}$$
+        <p>これらを（イ）に代入すると、\(\partial H/\partial X\) の係数は \(\dfrac{\partial X}{\partial x}\dfrac{\partial X}{\partial p}-\dfrac{\partial X}{\partial p}\dfrac{\partial X}{\partial x}=0\) となって消え、</p>
+        $$\dot X = \frac{\partial H}{\partial P}\left(\frac{\partial X}{\partial x}\frac{\partial P}{\partial p} - \frac{\partial X}{\partial p}\frac{\partial P}{\partial x}\right)$$
+        <p>これが正準方程式 \(\dot X=\partial H/\partial P\) と（任意の H について）一致するためには、丸括弧の中身が 1 でなければならない。</p>
+        $$\therefore\quad \frac{\partial X}{\partial x}\frac{\partial P}{\partial p} - \frac{\partial X}{\partial p}\frac{\partial P}{\partial x} = 1$$
+        <div class="result">これは基礎知識でまとめたポアソン括弧の条件 {X,P}=1 と同じであることが確認できる。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p11">
+      <div class="problem-head">
+        <div class="p-badge">11</div>
+        <div class="p-meta">
+          <div class="p-source">例題3.3（P.37）&middot; よく出てくる重要問題</div>
+          <div class="p-title">\(X=k\sqrt{2x}\cos p,\ P=(1/k)\sqrt{2x}\sin p\)</div>
+        </div>
+      </div>
+      <div class="statement">
+        <p>\(X=k\sqrt{2x}\cos p\) …(i)　\(P=(1/k)\sqrt{2x}\sin p\) …(ii)</p>
+      </div>
+      <span class="solution-label">解説（前提の変換式）</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">これは何の変換？</span>
+          この変換は、調和振動子（単振動）の相空間の楕円軌道を、きれいな円軌道に描き直す変換です。x は元のハミルトニアンの「作用変数的な量」、p は「角度的な量」に近い役割を持っています。物理的な意味は下の補足（幾何学的な意味）にまとまっているので、先に読んでから計算を追うと見通しが良くなります。
+        </div>
+        <p>この変換の正準性は次の問題12で確認する。まず偏微分を準備しておく。</p>
+        $$\frac{\partial X}{\partial p} = -k\sqrt{2x}\sin p,\quad \frac{\partial X}{\partial x} = \frac{k}{\sqrt{2x}}\cos p,\quad \frac{\partial P}{\partial p} = \frac{1}{k}\sqrt{2x}\cos p,\quad \frac{\partial P}{\partial x} = \frac{1}{k\sqrt{2x}}\sin p$$
+        <div class="tip"><span class="tip-label">幾何学的な意味</span>(P,X) 平面で \((P/\sqrt{2mE})^2+(X/\sqrt{2E/m\omega^2})^2=1\) という楕円軌道を表し、k²=mω, x=E/ω とおくと単振動の相空間の円軌道になる。E が大きいほど半径が大きくなり、軌道は時計回りに進む。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p12">
+      <div class="problem-head">
+        <div class="p-badge">12</div>
+        <div class="p-meta">
+          <div class="p-source">例題3.3内 &middot; Q2</div>
+          <div class="p-title">(X,P) が正準変数であることの確認</div>
+        </div>
+      </div>
+      <div class="statement"><p>(X, P) が正準変数であることを確かめよ。</p></div>
+      <span class="solution-label">解説（ポアソン括弧 {X,P}=1 を直接確認）</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">方針</span>
+          基礎知識でまとめた判定条件 \(\{X,P\}_{x,p}=\dfrac{\partial X}{\partial x}\dfrac{\partial P}{\partial p}-\dfrac{\partial X}{\partial p}\dfrac{\partial P}{\partial x}=1\) を、問11で求めた4つの偏微分をそのまま代入して直接確かめます。逆関数を経由するような複雑な計算は必要ありません。
+        </div>
+        <p>問11の結果を並べると</p>
+        $$\frac{\partial X}{\partial x} = \frac{k}{\sqrt{2x}}\cos p,\quad \frac{\partial X}{\partial p} = -k\sqrt{2x}\sin p,\quad \frac{\partial P}{\partial x} = \frac{1}{k\sqrt{2x}}\sin p,\quad \frac{\partial P}{\partial p} = \frac{\sqrt{2x}}{k}\cos p$$
+        <p>これらを {X,P} の定義に代入すると</p>
+        $$\{X,P\} = \frac{\partial X}{\partial x}\frac{\partial P}{\partial p} - \frac{\partial X}{\partial p}\frac{\partial P}{\partial x} = \left(\frac{k}{\sqrt{2x}}\cos p\right)\!\left(\frac{\sqrt{2x}}{k}\cos p\right) - \left(-k\sqrt{2x}\sin p\right)\!\left(\frac{1}{k\sqrt{2x}}\sin p\right)$$
+        $$= \cos^2p + \sin^2p = 1$$
+        <div class="result">{X,P}=1 が成り立つので、(X,P) は正準変数であることが示された。</div>
+        <div class="tip">
+          <span class="tip-label">もっと簡単な方法</span>
+          別解（下記）のように、母関数 W から \(J=\oint p\,dx=\oint P\,dX\) という保存則を使えば、偏微分を計算しなくても正準性を確認できる。
+        </div>
+      </div>
+    </div>
+
+    <div class="problem" id="p12b">
+      <div class="problem-head">
+        <div class="p-badge">別解</div>
+        <div class="p-meta">
+          <div class="p-source">(3.62) より</div>
+          <div class="p-title">作用変数 J の導入</div>
+        </div>
+      </div>
+      <div class="solution">
+        $$L(x,\dot x,t) = p\dot x - H(x,p,t) = P\dot X - H'(X,P,t) + \frac{dW}{dt}$$
+        <p>変換 (3.64) は t に陽によらないため \(\partial W/\partial t=0\)。よって</p>
+        $$dW = p\,dx - P\,dX - (H(x,p)-H'(X,P))dt$$
+        <p>\(\partial W/\partial t=0\) より \(H(x,p)=H'(X,P)\)（H は不変）。</p>
+        $$\therefore dW = p\,dx - P\,dX \ \Rightarrow\ \oint dW = 0 \ \Rightarrow\ \oint p\,dx = \oint P\,dX$$
+        <div class="result">これにより \(J\equiv\oint p\,dx\)（作用変数）が正準変換によって不変であることが分かる（相空間上の閉曲線の面積として図示される）。</div>
+        <div class="stumble">
+          <span class="stumble-label">\(\oint dW=0\) となる理由</span>
+          W は x, X（あるいは p, P）の一価関数なので、相空間上の閉じた軌道を1周してもとの点に戻れば、W の値ももとに戻ります。つまり dW を1周積分すると必ず 0 になります。これは「保存力の位置エネルギーを1周積分すると0になる」のと同じ発想です。
+        </div>
+      </div>
+    </div>
+
+    <div class="problem" id="p13">
+      <div class="problem-head">
+        <div class="p-badge">13</div>
+        <div class="p-meta">
+          <div class="p-source">演習問題〔4〕（P.39）</div>
+          <div class="p-title">単振動の正準変換（3小問）</div>
+        </div>
+      </div>
+      <div class="statement">
+        <p>単振動 H = (1/2m)p² + (1/2)mω²x²、母関数 W(x,X) = (mω/2)x² cot X による正準変換について</p>
+        <p>① X に共役な運動量 P を求めよ　② X, P に対する H(X,P) を求めよ　③ X, P に関する正準方程式を書き、時間の関数として求めよ</p>
+      </div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p><strong>① P を求める</strong></p>
+        $$-P = \frac{\partial W}{\partial X} = -\frac{m\omega}{2}x^2\cdot\frac{1}{\sin^2 X} \quad(\text{あ})$$
+        <p><strong>② H(X,P) を求める</strong>　W は t を陽に含まないので H は不変。</p>
+        $$p = \frac{\partial W}{\partial x} = m\omega x\cot X \quad(\text{い})$$
+        <div class="stumble">
+          <span class="stumble-label">x², p² を X, P だけで表す方針</span>
+          最終的に欲しいのは H(X,P)=p²/2m + mω²x²/2 の右辺を x, X ではなく X, P だけで表した式です。（あ）から x² を P と sin²X で、（い）から p² を x²（＝上の式）と cot²X で表せるので、順番に代入して x を完全に消去します。三角関数の恒等式 sin²+cos²=1 を使うところがポイントです。
+        </div>
+        <p>まず（あ）を x² について解く。−P=−(mω/2)x²/sin²X の両辺に −1 をかけて</p>
+        $$P = \frac{m\omega}{2}\cdot\frac{x^2}{\sin^2X} \quad\Rightarrow\quad x^2 = \frac{2P\sin^2X}{m\omega} \quad(\text{あ}')$$
+        <p>次に（い）p=mωx cot X の両辺を2乗すると</p>
+        $$p^2 = m^2\omega^2x^2\cot^2X$$
+        <p>ここに（あ′）の x² を代入すると</p>
+        $$p^2 = m^2\omega^2\cot^2X\cdot\frac{2P\sin^2X}{m\omega} = 2m\omega P\cot^2X\sin^2X$$
+        <p>cot X = cos X/sin X なので cot²X sin²X = cos²X。よって</p>
+        $$p^2 = 2m\omega P\cos^2X$$
+        <p>これで x², p² がどちらも X, P だけで表せた。H = p²/2m + (1/2)mω²x² にそれぞれ代入すると</p>
+        $$\frac{p^2}{2m} = \frac{2m\omega P\cos^2X}{2m} = \omega P\cos^2X$$
+        $$\frac{1}{2}m\omega^2x^2 = \frac{1}{2}m\omega^2\cdot\frac{2P\sin^2X}{m\omega} = \omega P\sin^2X$$
+        <p>この2つを足すと</p>
+        $$H = \omega P\cos^2X + \omega P\sin^2X = \omega P(\cos^2X+\sin^2X) = \omega P = H'$$
+        <p><strong>③ 正準方程式</strong></p>
+        $$\dot X = \frac{\partial H'}{\partial P} = \omega,\qquad \dot P = -\frac{\partial H'}{\partial X} = 0$$
+        $$\therefore X = \omega t + \alpha\ (\text{積分定数}),\qquad P = -\text{定数}$$
+        <div class="tip"><span class="tip-label">この設問の意味</span>H′=Pω は P にのみ依存するため、X は角変数（一定速度ωで単調増加）、P は作用変数（保存量）。単振動を作用・角変数で記述する典型例であり、§4.5の考え方の先取りになっている。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p14">
+      <div class="problem-head">
+        <div class="p-badge">14</div>
+        <div class="p-meta">
+          <div class="p-source">章末問題〔5〕</div>
+          <div class="p-title">質量が変化する調和振動子の保存量</div>
+        </div>
+      </div>
+      <div class="statement"><p>調和振動子 \(H=p^2/2m+(1/2)m\omega^2x^2\) の質量が \(m(t)=m_0e^{-\alpha t}\) で変化する場合の保存量を求めよ。（エネルギーは保存しない。ヒント：母関数 \(W(x,P,t)=\sqrt{m(t)}\,xP\) による変換）</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">問1との違い</span>
+          問1では「H が t を陽に含まなければ H は保存量」と学びました。この問題では m(t) が時間変化するため H は t を陽に含み、H そのものはもう保存しません。そこで正準変換によって、別の保存量 H′ を新しく作り出す、というのがこの問題のねらいです。
+        </div>
+        <p>ヒントの母関数 \(W''(x,P,t)=\sqrt{m(t)}\,xP\) は、独立変数が x と P（基礎知識の表の「古い座標 x・新しい運動量 P」型）なので、関係式 \(p=\partial W''/\partial x,\ X=\partial W''/\partial P,\ H'=H+\partial W''/\partial t\) をそのまま使う。</p>
+        <p><strong>① p を求める</strong>　W″ を x で偏微分する（P, t を定数とみなす）と</p>
+        $$p = \frac{\partial W''}{\partial x} = \frac{\partial}{\partial x}\left(\sqrt{m(t)}\,xP\right) = \sqrt{m(t)}\,P$$
+        <p>この式は後で使うために P について解いておく：\(P = p/\sqrt{m(t)}\)。</p>
+        <p><strong>② X を求める</strong>　W″ を P で偏微分する（x, t を定数とみなす）と</p>
+        $$X = \frac{\partial W''}{\partial P} = \frac{\partial}{\partial P}\left(\sqrt{m(t)}\,xP\right) = \sqrt{m(t)}\,x$$
+        <p><strong>③ \(\partial W''/\partial t\) を求める</strong>　\(W''=\sqrt{m(t)}\,xP\) の中で t に依存するのは \(\sqrt{m(t)}\) の部分だけなので、合成関数の微分（連鎖律）を使う。</p>
+        $$\frac{\partial W''}{\partial t} = xP\cdot\frac{d}{dt}\sqrt{m(t)}$$
+        <p>m(t)=m₀e<sup>−αt</sup> なので、まず \(\dot m(t)\) を計算すると</p>
+        $$\dot m(t) = \frac{d}{dt}(m_0e^{-\alpha t}) = -\alpha m_0e^{-\alpha t} = -\alpha\,m(t)$$
+        <p>次に \(d/dt\sqrt{m(t)}\) を、合成関数の微分公式 \(d/dt(f^{1/2})=(1/2)f^{-1/2}\dot f\) を使って計算する。</p>
+        $$\frac{d}{dt}\sqrt{m(t)} = \frac{1}{2\sqrt{m(t)}}\dot m(t) = \frac{1}{2\sqrt{m(t)}}\cdot(-\alpha\,m(t)) = -\frac{\alpha}{2}\sqrt{m(t)}$$
+        <div class="stumble">
+          <span class="stumble-label">この微分の計算方法</span>
+          \(f(t)=m(t)^{1/2}\) の形の微分は、まず一般に \(df/dt=(1/2)m(t)^{-1/2}\dot m(t)\) と書けます（べき関数の微分 \(d/dx(x^{1/2})=(1/2)x^{-1/2}\) を m(t) に対して連鎖律で適用したもの）。ここに \(\dot m=-\alpha m\) を代入すると、\(m(t)^{-1/2}\cdot m(t)=m(t)^{1/2}=\sqrt{m(t)}\) となるので、結局 \(-(\alpha/2)\sqrt{m(t)}\) という簡単な形にまとまります。
+        </div>
+        <p>したがって</p>
+        $$\frac{\partial W''}{\partial t} = xP\cdot\left(-\frac{\alpha}{2}\sqrt{m(t)}\right) = -\frac{\alpha}{2}\left(\sqrt{m(t)}\,x\right)P$$
+        <p>ここで②の結果 \(X=\sqrt{m(t)}\,x\) を使うと、\(\sqrt{m(t)}\,x\) をそのまま X に置き換えられる。</p>
+        $$\frac{\partial W''}{\partial t} = -\frac{\alpha}{2}XP$$
+        <p><strong>④ H を X, P で表す</strong>　\(H=p^2/2m(t)+(1/2)m(t)\omega^2x^2\) に、①の \(p=\sqrt{m(t)}P\) と②の \(x=X/\sqrt{m(t)}\) を代入する。まず p² と x² をそれぞれ計算すると</p>
+        $$p^2 = \left(\sqrt{m(t)}\,P\right)^2 = m(t)P^2,\qquad x^2 = \left(\frac{X}{\sqrt{m(t)}}\right)^2 = \frac{X^2}{m(t)}$$
+        <p>これらを H に代入すると、どちらの項からも m(t) がきれいに約分されて消える。</p>
+        $$\frac{p^2}{2m(t)} = \frac{m(t)P^2}{2m(t)} = \frac{1}{2}P^2,\qquad \frac{1}{2}m(t)\omega^2x^2 = \frac{1}{2}m(t)\omega^2\cdot\frac{X^2}{m(t)} = \frac{1}{2}\omega^2X^2$$
+        <p>よって</p>
+        $$H = \frac{1}{2}P^2 + \frac{1}{2}\omega^2X^2$$
+        <p><strong>⑤ H′ を求める</strong>　\(H'=H+\partial W''/\partial t\) の定義に③④の結果を代入すると</p>
+        $$H' = \frac{1}{2}P^2+\frac{1}{2}\omega^2X^2 - \frac{\alpha}{2}XP$$
+        <div class="result">この H′ が新しい正準変数 (X,P) に対する保存量。もとの H は m(t) の変化により保存しないが、変数変換後の H′ は保存する。</div>
+      </div>
+    </div>
+
+    <!-- ============ 先生オリジナル：基礎知識 ============ -->
+    <h2 class="chapter is-concept" id="concept-noether"><span class="chap-no">基礎知識</span>微小正準変換の考え方</h2>
+    <a class="back-to-toc" href="#toc">&uarr; 目次に戻る</a>
+
+    <div class="concept">
+      <span class="concept-label">STEP 2｜ネーターの定理を理解するための準備</span>
+      <p>問15〜17では「微小（infinitesimal）な正準変換」と「保存量」の関係、いわゆるネーターの定理の考え方を扱います。ここでは母関数 S を使った微小変換の一般形を先にまとめておきます。</p>
+
+      <h4>微小正準変換の一般形</h4>
+      <p>正準変換の母関数として、恒等変換 \(\sum_i p_iX_i\) に、小さなパラメータ ε をかけた項 \(\varepsilon S(x,p)\) を加えたものを考えます。</p>
+      $$W'''(x,p) = \sum_i p_i x_i + \varepsilon S(x,p)$$
+      <p>このとき、新しい変数と古い変数のずれ δx=X−x, δp=P−p は、母関数の微分を使って次のように書けることが分かります（教科書 (3.6x) 相当）。</p>
+      $$\delta x_i = \varepsilon\frac{\partial S}{\partial p_i}, \qquad \delta p_i = -\varepsilon\frac{\partial S}{\partial x_i}$$
+      <p>この S を「変換の生成子（generator）」と呼びます。S の形を変えるだけで、並進・回転・時間発展など、いろいろな種類の変換を統一的に表せるのがポイントです。</p>
+
+      <h4>なぜ角運動量が回転の生成子になるのか（直感）</h4>
+      <p>問15では \(S=\varepsilon(yp_x-xp_y)\) と角運動量に比例する S を選ぶと、δx, δy が実際に微小回転の式になることを確認します。逆に言えば「角運動量という保存量の正体は、空間の回転対称性から生じるものである」という、ネーターの定理の中心的な主張の具体例になっています。同様に、時間並進対称性からはエネルギー保存則、空間並進対称性からは運動量保存則が導かれる、というのがネーターの定理の一般論です。</p>
+
+      <h4>問16・17で目指すこと</h4>
+      <p>問16・17では、時間や座標を微小にずらす変換のもとで作用積分 \(I=\int L\,dt\) が不変（I′=I）となるための条件を調べ、「その条件を満たすためには、ある量 N が時間的に一定でなければならない」ということを示します。これは「対称性 ⇒ 保存量」というネーターの定理の一般的な証明の骨格をなぞったものです。計算は長いですが、ゴールは常に「N が保存量であることを示す」という1点にあることを意識すると迷いにくくなります。</p>
+    </div>
+
+    <!-- ============ 先生オリジナル ============ -->
+    <h2 class="chapter"><span class="chap-no">補講</span>先生オリジナルの問題（ネーターの定理）</h2>
+    <a class="back-to-toc" href="#toc">&uarr; 目次に戻る</a>
+    <p class="chapter-note">3章末〜4章冒頭に挟まれた、微小正準変換と保存量に関する導入。</p>
+
+    <div class="problem" id="p15">
+      <div class="problem-head">
+        <div class="p-badge">15</div>
+        <div class="p-meta">
+          <div class="p-source">〔例〕Q1</div>
+          <div class="p-title">回転の生成子としての角運動量</div>
+        </div>
+      </div>
+      <div class="statement"><p>\(S(x,p)=\varepsilon(yp_x-xp_y)\) のとき、\(\delta x,\ \delta y,\ \delta p_x,\ \delta p_y\) がどうなるかを調べよ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <p>無限小変換 \(\delta x_i=\partial S/\partial p_i,\ \delta p_i=-\partial S/\partial x_i\) より</p>
+        $$\delta x = \frac{\partial S}{\partial p_x} = \varepsilon y,\qquad \delta y = \frac{\partial S}{\partial p_y} = -\varepsilon x$$
+        $$\delta p_x = -\frac{\partial S}{\partial x} = \varepsilon p_y,\qquad \delta p_y = -\frac{\partial S}{\partial y} = -\varepsilon p_x$$
+        <p>行列で書くと</p>
+        $$\begin{pmatrix}x'\\y'\end{pmatrix} = \begin{pmatrix}1 & \varepsilon\\ -\varepsilon & 1\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix} \approx \begin{pmatrix}\cos\varepsilon & \sin\varepsilon\\-\sin\varepsilon & \cos\varepsilon\end{pmatrix}\begin{pmatrix}x\\y\end{pmatrix}$$
+        <div class="stumble">
+          <span class="stumble-label">最後の行列の変形</span>
+          ε が小さいとき cos ε ≈ 1, sin ε ≈ ε という近似（1次までのテイラー展開）を使うと、回転行列 (cos ε, sin ε; −sin ε, cos ε) は (1, ε; −ε, 1) にほぼ一致します。つまり最初に出てきた行列は「角度 ε の回転行列を1次近似したもの」に他なりません。
+        </div>
+        <div class="tip"><span class="tip-label">今日の最重要ポイント</span>これは角度 ε の微小回転そのもの。\(S=\varepsilon(yp_x-xp_y)\) は「角運動量が回転変換の生成子である」ことを示す。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p16">
+      <div class="problem-head">
+        <div class="p-badge">16</div>
+        <div class="p-meta">
+          <div class="p-source">§4.2 ネーターの定理 &middot; Q2</div>
+          <div class="p-title">保存量 N の導出①</div>
+        </div>
+      </div>
+      <div class="statement">
+        <p>\(t'=t+\varepsilon w(x,t)\)，\(x'=x+\varepsilon u(x,t)\) で不変な量 \(N=\varepsilon\!\left(\dfrac{\partial L}{\partial \dot x}u(x,t)-w(x,t)H\right)\) について、I′ = I となる条件が N が定数であることを示せ（\(I'=I+\oint N\)）。</p>
+      </div>
+      <span class="solution-label">解説（証明）</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">この証明の流れ（先に全体像）</span>
+          ①作用 I′ を新しい変数 t′, x′ で表す。②積分変数を t′ から t に変換し、L(x′,dx′/dt′) を ε の1次までテイラー展開する。③I′−I を計算すると、被積分関数が「ある量の時間についての完全微分」（＝境界の値だけで決まる形）にまとまることを示す。④I′=I が任意の積分区間で成り立つためには、その境界項の中身 N が時間によらない定数でなければならない、と結論する。この問題では \(L=L(x,\dot x)\) が t を陽に含まない（＝オートノマスな系である）ことを前提としている。
+        </div>
+        $$I' = \int_{t_0'}^{t_1'}dt'\,L\!\left(x',\frac{dx'}{dt'}\right),\qquad I = \int_{t_0}^{t_1}dt\,L\!\left(x,\frac{dx}{dt}\right)$$
+
+        <p><strong>Step 1：dt′ を dt で表す</strong></p>
+        <p>t′=t+εw(x,t) の両辺を、もとの時刻 t で微分する。w は軌道上で x=x(t) を通じて t にも依存する合成関数なので、全微分（連鎖律）を使う。</p>
+        $$\frac{dt'}{dt} = 1 + \varepsilon\frac{dw}{dt} = 1+\varepsilon\dot w,\qquad \text{ただし } \dot w \equiv \frac{\partial w}{\partial x}\dot x + \frac{\partial w}{\partial t}$$
+        $$\therefore\ dt' = (1+\varepsilon\dot w)\,dt$$
+        <p>積分変数を t′ から t に置き換えると、積分区間は（t0′, t1′ に対応する）t0, t1 のまま書き直せるので</p>
+        $$I' = \int_{t_0}^{t_1}dt\,(1+\varepsilon\dot w)\,L\!\left(x',\frac{dx'}{dt'}\right)$$
+
+        <p><strong>Step 2：dx′/dt′ を ε の1次まで求める</strong></p>
+        <p>x′=x+εu(x,t) を t で微分すると、同じく連鎖律で</p>
+        $$\frac{dx'}{dt} = \dot x + \varepsilon\dot u,\qquad \text{ただし } \dot u \equiv \frac{\partial u}{\partial x}\dot x + \frac{\partial u}{\partial t}$$
+        <p>したがって dx′/dt′ は次の商で書ける。</p>
+        $$\frac{dx'}{dt'} = \frac{dx'/dt}{dt'/dt} = \frac{\dot x+\varepsilon\dot u}{1+\varepsilon\dot w}$$
+        <p>ε は微小量なので、分母を \(1/(1+\varepsilon\dot w) \approx 1-\varepsilon\dot w\) （ε² 以上の項を無視する近似）で置き換えて分子と掛け合わせる。</p>
+        $$\frac{dx'}{dt'} \simeq (\dot x+\varepsilon\dot u)(1-\varepsilon\dot w) = \dot x - \varepsilon\dot x\dot w + \varepsilon\dot u - \varepsilon^2\dot u\dot w$$
+        <p>ε² の項を無視すると</p>
+        $$\frac{dx'}{dt'} \simeq \dot x + \varepsilon(\dot u-\dot x\dot w)$$
+
+        <p><strong>Step 3：L(x′,dx′/dt′) を ε の1次までテイラー展開する</strong></p>
+        <p>\(x'=x+\varepsilon u\)，\(dx'/dt'=\dot x+\varepsilon(\dot u-\dot x\dot w)\) を、2変数関数 \(L(x,\dot x)\) のテイラー展開の公式 \(L(x+\Delta x,\dot x+\Delta\dot x)\simeq L(x,\dot x)+\dfrac{\partial L}{\partial x}\Delta x+\dfrac{\partial L}{\partial \dot x}\Delta\dot x\) に当てはめる（\(\Delta x=\varepsilon u,\ \Delta\dot x=\varepsilon(\dot u-\dot x\dot w)\) とみなす）。</p>
+        $$L\left(x',\frac{dx'}{dt'}\right) \simeq L(x,\dot x) + \frac{\partial L}{\partial x}\cdot\varepsilon u + \frac{\partial L}{\partial \dot x}\cdot\varepsilon(\dot u-\dot x\dot w)$$
+
+        <p><strong>Step 4：I′ の被積分関数を展開し、I との差をとる</strong></p>
+        <p>Step1 の \((1+\varepsilon\dot w)\) と Step3 の L の展開を掛け合わせ、ε の1次までを残す。</p>
+        $$(1+\varepsilon\dot w)L\left(x',\frac{dx'}{dt'}\right) \simeq L(x,\dot x) + \varepsilon\dot wL(x,\dot x) + \varepsilon u\frac{\partial L}{\partial x} + \varepsilon(\dot u-\dot x\dot w)\frac{\partial L}{\partial \dot x}$$
+        <p>右辺の第1項 \(L(x,\dot x)\) は I の被積分関数そのものなので、I′−I を計算すると、これは打ち消し合って ε の項だけが残る。</p>
+        $$I'-I = \varepsilon\int_{t_0}^{t_1}dt\left[\dot wL + u\frac{\partial L}{\partial x} + \dot u\frac{\partial L}{\partial \dot x} - \dot x\dot w\frac{\partial L}{\partial \dot x}\right]$$
+
+        <p><strong>Step 5：\(\dot w\) の係数をまとめてハミルトニアンを作る</strong></p>
+        <p>被積分関数のうち、\(\dot w\) を含む2つの項 \(\dot wL\) と \(-\dot x\dot w(\partial L/\partial \dot x)\) をまとめると</p>
+        $$\dot wL - \dot x\dot w\frac{\partial L}{\partial \dot x} = \dot w\left(L-\dot x\frac{\partial L}{\partial \dot x}\right)$$
+        <p>ここでハミルトニアンの定義 \(H=p\dot x-L=\dot x(\partial L/\partial \dot x)-L\) を思い出すと、括弧の中身は \(L-\dot x(\partial L/\partial \dot x)=-H\) とちょうど一致する。よって</p>
+        $$\dot wL - \dot x\dot w\frac{\partial L}{\partial \dot x} = -\dot wH$$
+        <p>したがって、被積分関数は次のようにまとまる。</p>
+        $$I'-I = \varepsilon\int_{t_0}^{t_1}dt\left[u\frac{\partial L}{\partial x} + \dot u\frac{\partial L}{\partial \dot x} - \dot wH\right]$$
+
+        <p><strong>Step 6：残りの2項を1つの時間微分にまとめる</strong></p>
+        <p>オイラー・ラグランジュ方程式 \(\partial L/\partial x=d/dt(\partial L/\partial \dot x)\) を使って、第1項 \(u(\partial L/\partial x)\) を書き換える。</p>
+        $$u\frac{\partial L}{\partial x} = u\cdot\frac{d}{dt}\left(\frac{\partial L}{\partial \dot x}\right)$$
+        <p>ここで積の微分公式 \(d/dt(fg)=\dot fg+f\dot g\) を、f=u, \(g=\partial L/\partial \dot x\) に当てはめると \(d/dt(u\cdot\partial L/\partial \dot x)=\dot u\cdot\partial L/\partial \dot x+u\cdot d/dt(\partial L/\partial \dot x)\) となるので、これを \(u(\partial L/\partial x)+\dot u(\partial L/\partial \dot x)\) と見比べると</p>
+        $$u\frac{\partial L}{\partial x} + \dot u\frac{\partial L}{\partial \dot x} = \frac{d}{dt}\left(u\frac{\partial L}{\partial \dot x}\right)$$
+        <p>これを Step5 の式に代入すると</p>
+        $$I'-I = \varepsilon\int_{t_0}^{t_1}dt\left[\frac{d}{dt}\left(u\frac{\partial L}{\partial \dot x}\right) - \dot wH\right]$$
+
+        <p><strong>Step 7：\(-\dot wH\) も時間微分の形にする</strong></p>
+        <p>\(L=L(x,\dot x)\) は t を陽に含まないと仮定しているので、H も t を陽に含まない。したがって問1の結果より dH/dt=0 が軌道上で成り立つ。この事実を使うと、積の微分公式から</p>
+        $$\frac{d}{dt}(wH) = \dot wH + w\dot H = \dot wH + w\cdot 0 = \dot wH$$
+        <p>すなわち \(\dot wH=d/dt(wH)\) がそのまま成り立つ（余分な項が出ない）。よって</p>
+        $$I'-I = \varepsilon\int_{t_0}^{t_1}dt\,\frac{d}{dt}\left[u\frac{\partial L}{\partial \dot x} - wH\right]$$
+
+        <p><strong>Step 8：積分を実行して境界項の形にする</strong></p>
+        <p>ある量の時間微分を時間で積分すると、その量の両端での値の差になる（微積分学の基本定理）。</p>
+        $$I'-I = \varepsilon\left[u\frac{\partial L}{\partial \dot x} - wH\right]_{t_0}^{t_1} = \varepsilon\left(\frac{\partial L}{\partial \dot x}u - wH\right)\Big|_{t_0}^{t_1}$$
+
+        <div class="result">
+          I′=I（作用が不変）となるためには、この境界項の中身 \(N=\varepsilon\!\left((\partial L/\partial \dot x)u(x,t)-w(x,t)H\right)\) が、t0 での値と t1 での値がどんな t0, t1 についても等しくなければならない。つまり N は運動の間ずっと一定値をとる保存量でなければならない。∎
+        </div>
+      </div>
+    </div>
+
+    <div class="problem" id="p17">
+      <div class="problem-head">
+        <div class="p-badge">17</div>
+        <div class="p-meta">
+          <div class="p-source">§4.2 ネーターの定理 &middot; Q3</div>
+          <div class="p-title">保存量 N の導出②（xのみの変換）</div>
+        </div>
+      </div>
+      <div class="statement"><p>\(L(x',\dot x')=L(x+\varepsilon u,\ \dot x+\varepsilon\dot u)\) について、同様にして (☆) を導け。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">問16との違い</span>
+          問16は時刻 t 自身も t′=t+εw(x,t) のようにずらす一般的な場合でした。この問題は時刻はずらさず（w=0 に相当）、座標 x だけを x′=x+εu(x,t) のようにずらす、より単純な場合を扱います。手順は同じですが、時間に関する項が出てこない分だけ計算は簡単になります。
+        </div>
+        $$L(x',\dot x') = L(x,\dot x) + \varepsilon\frac{\partial L(x,\dot x)}{\partial \dot x}\dot u + \varepsilon\frac{\partial L(x,\dot x)}{\partial x}u$$
+        <p>\(x'=x+\varepsilon u,\ \dot x'=\dot x+\varepsilon\dot u\) で不変量となる条件は、オイラー・ラグランジュ方程式 \(d/dt(\partial L/\partial \dot x)=\partial L/\partial x\) を用いて</p>
+        $$\varepsilon\frac{d}{dt}\left(\frac{\partial L}{\partial \dot x}u\right) = \varepsilon\left(\frac{\partial L}{\partial \dot x}\dot u + \frac{\partial L}{\partial x}u\right)$$
+        <div class="result">∴ \((\partial L/\partial \dot x)u\) が保存量（時間発展のない場合の N の x-part）であることが示される。</div>
+      </div>
+    </div>
+
+    <!-- ============ 第4章：基礎知識 ============ -->
+    <h2 class="chapter is-concept" id="concept-ch4"><span class="chap-no">基礎知識</span>ハミルトン・ヤコビ方程式の前提</h2>
+    <a class="back-to-toc" href="#toc">&uarr; 目次に戻る</a>
+
+    <div class="concept">
+      <span class="concept-label">STEP 3｜第4章を読むための準備</span>
+
+      <h4>ハミルトン・ヤコビ方程式の位置づけ</h4>
+      <p>基礎知識STEP1で「H′ が簡単になるように正準変換を選べば、運動方程式が解きやすくなる」と述べました。第4章では、その理想を極限まで推し進め、<strong>新しいハミルトニアン H′ をまるごと 0 にしてしまう</strong> ような正準変換を探します。母関数として W″(x,α,t) 型（基礎知識の表の「古い座標 x・新しい運動量 P」型で、新しい運動量を α と書いたもの）を使うと、条件 H′=0 は次の偏微分方程式になります。これが「ハミルトン・ヤコビ（HJ）方程式」です。</p>
+      $$\frac{\partial W''}{\partial t} + H\left(x,\frac{\partial W''}{\partial x},t\right) = 0$$
+      <p>ここで \(p=\partial W''/\partial x\)（基礎知識の表の関係式）を使い、H の中の p をすべて \(\partial W''/\partial x\) に置き換えている点に注意してください。W″ は他の教科書では S（ハミルトンの主関数）と呼ばれることが多い量です。</p>
+
+      <h4>H′=0 が嬉しい理由</h4>
+      <p>H′=0 なら、新しい正準方程式は \(\dot X=\partial H'/\partial P=0,\ \dot P=-\partial H'/\partial X=0\) となり、新しい変数 X, P はどちらも時間に対して定数になります。つまり新しい座標系では「粒子は止まっている」ように見える変数の組が手に入るのです。あとは \(X=\partial W''/\partial \alpha\)（α は積分定数、基礎知識の表の P に相当）の関係式を x について解けば、x(t) が求まります。この「\(\beta=\partial W''/\partial \alpha\)」という関係式は、運動の初期条件（例えば初期位置）に対応する定数を表しています。</p>
+
+      <h4>作用変数・角変数、断熱不変量とは</h4>
+      <p>問20〜22で出てくる「作用変数」\(J=\oint p\,dx\) は、相空間での閉じた軌道が囲む面積にあたる量です（問12別解で見た J の正準不変性が基礎になっています）。J に対応する「角変数」ω は、H が J だけの関数になるとき \(\dot\omega=\partial H/\partial J=\)一定 という単純な形で時間発展し、1周期 T の間に ω がちょうど 2π 変化する量として定義されます。</p>
+      <p>「断熱不変量」とは、系のパラメータ（問20では箱の壁の位置）がゆっくり（系の運動の周期に比べて十分ゆっくり）変化するとき、作用変数 J がほとんど変化しない（厳密には変化速度の1次のオーダーでは変化しない）という性質のことです。これは初期の量子論（ボーア・ゾンマーフェルト量子化条件）でも重要な役割を果たした考え方です。</p>
+    </div>
+
+    <!-- ============ 第4章 ============ -->
+    <h2 class="chapter"><span class="chap-no">第4章</span>ハミルトン・ヤコビ方程式と作用変数</h2>
+    <a class="back-to-toc" href="#toc">&uarr; 目次に戻る</a>
+    <p class="chapter-note">母関数 W″(x,α,t) を用いた運動方程式の解法から、作用変数・角度変数、断熱不変量までを扱う。</p>
+
+    <div class="problem" id="p18">
+      <div class="problem-head">
+        <div class="p-badge">18</div>
+        <div class="p-meta">
+          <div class="p-source">例題4.1（P.52）</div>
+          <div class="p-title">自由粒子のハミルトン・ヤコビ方程式</div>
+        </div>
+      </div>
+      <div class="statement"><p>H = (1/2m)p² のハミルトン・ヤコビ方程式を解け（3次元）。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        $$\frac{\partial W''}{\partial t} + H\left(x,\frac{\partial W''}{\partial x}\right) = 0$$
+        <p>3次元で \(p=\nabla W''(r)\) とおくと</p>
+        $$\frac{\partial W''}{\partial t}+\frac{1}{2m}(\vec\nabla W'')^2 = 0 \quad(\bigstar)$$
+        <p>\(W''(r,\alpha,t)=\alpha_1x+\alpha_2y+\alpha_3z+\alpha_0t\) とおいて代入すると \(-2m\alpha_0+\alpha_1^2+\alpha_2^2+\alpha_3^2=0\) より</p>
+        <div class="stumble">
+          <span class="stumble-label">なぜこの形を仮定してよいのか</span>
+          （★）式は x,y,z,t について特に複雑な結合をしていない（各変数の1次微分の2乗和＋tの1次微分、という単純な形）ため、W″ が各変数の1次式の和で書けると仮定して代入してみる、という「変数分離法」の考え方です。実際に代入して矛盾なく解が求まるので、この仮定は正しかったことになります（問19でも同様の方針を使います）。
+        </div>
+        $$W'' = \alpha_1x+\alpha_2y+\alpha_3z - \frac{1}{2m}(\alpha_1^2+\alpha_2^2+\alpha_3^2)t$$
+        <p>\(p_x=\alpha_1,\ p_y=\alpha_2,\ p_z=\alpha_3\) とし、\(\beta=\partial W''/\partial \alpha\) をとると</p>
+        <div class="stumble">
+          <span class="stumble-label">\(\beta=\partial W''/\partial \alpha\) とは何か</span>
+          基礎知識STEP3で述べた通り、新しい座標 \(X=\partial W''/\partial \alpha\) は運動の間ずっと一定に保たれる量です。ここでは記号を β と書いていますが意味は同じで、α（＝p、運動量の初期値）で W″ を偏微分することで、初期位置に相当する保存量が得られます。
+        </div>
+        $$X=x-\frac{p_x}{m}t\ (\text{定数}),\quad Y=y-\frac{p_y}{m}t,\quad Z=z-\frac{p_z}{m}t$$
+        <div class="result">「等速直線運動する自由粒子の初期位置（t=0での位置）が保存量である」ことを意味する。</div>
+        <div class="tip">
+          <span class="tip-label">別解（時間に依存しない解法・より簡潔）</span>
+          H が t を陽に含まないので \(H=\)一定\(=E\) とし、\(W''=-Et+\sqrt{2mE}\,x\) と直接おける。\(E=\alpha^2/2m\) として \(\beta=\partial W''/\partial \alpha=-(\alpha/m)t+x\)（\(\alpha=p,\ \beta=X\)）とすれば同じ結果がベクトルなしで得られる。
+        </div>
+      </div>
+    </div>
+
+    <div class="problem" id="p19">
+      <div class="problem-head">
+        <div class="p-badge">19</div>
+        <div class="p-meta">
+          <div class="p-source">演習問題〔1〕（P.61）</div>
+          <div class="p-title">調和振動子のハミルトン・ヤコビ方程式</div>
+        </div>
+      </div>
+      <div class="statement"><p>H = p²/2m + (k/2)x² の運動をハミルトン・ヤコビ方程式を用いて解け。（ヒント：H は t を陽に含まないので H = 一定 = E）</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">「H=一定=E」を使う変数分離</span>
+          H が t を陽に含まないときは、\(W''(x,t)=-Et+S(x)\) と時間部分と座標部分を分離して仮定できます。これを HJ方程式 \(\partial W''/\partial t+H(x,\partial W''/\partial x)=0\) に代入すると \(-E+H(x,dS/dx)=0\)、つまり \(H(x,dS/dx)=E\) という、t を含まない常微分方程式に帰着します。この「時間部分を切り離す」手順は、H が陽に t を含まない問題（問18の別解や問19）に共通する定石です。
+        </div>
+        <p>\(W''=Et+S(x)\) とおく（\(p=\partial W''/\partial x\)）。</p>
+        $$\frac{1}{2m}\left(\frac{\partial S}{\partial x}\right)^2+\frac{k}{2}x^2 = E \quad\Rightarrow\quad \frac{\partial S}{\partial x}=\sqrt{2m}\sqrt{E-\frac{1}{2}kx^2}$$
+        <p>p = m dx/dt とおくと \(dt=\sqrt{m/2}\ dx/\sqrt{E-\frac{1}{2}kx^2}\)。積分して</p>
+        <div class="stumble">
+          <span class="stumble-label">積分の計算方法</span>
+          \(\int dx/\sqrt{E-kx^2/2}\) の形の積分は、\(x=\sqrt{2E/k}\,\sin\theta\) と置換すると \(\sqrt{E-kx^2/2}=\sqrt{E}\cos\theta\) となり、被積分関数がきれいに簡単になって arcsin 型の積分に帰着します。三角関数の置換積分の典型パターンなので、単振動が絡む積分では真っ先に候補にあがる置き方です。
+        </div>
+        $$t=\sqrt{\frac{m}{k}}\sin^{-1}\left(\frac{x}{\sqrt{2E/k}}\right)+C$$
+        $$\therefore x=\sqrt{\frac{2E}{k}}\sin\left(\sqrt{\frac{k}{m}}\,t+C'\right)$$
+        <div class="result">角振動数 \(\omega=\sqrt{k/m}\) の単振動の一般解。振幅は \(\sqrt{2E/k}\)（E が大きいほど振幅が大きい）。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p20">
+      <div class="problem-head">
+        <div class="p-badge">20</div>
+        <div class="p-meta">
+          <div class="p-source">例題4.2（P.53）&middot; §4.5 作用変数</div>
+          <div class="p-title">箱の中の粒子：\(J=\oint p\,dx\)</div>
+        </div>
+      </div>
+      <div class="statement"><p>一次元の井戸型ポテンシャル \(-L<x<L\) の中を運動する粒子について \(J=\oint p\,dx\) を求めよ。さらに、右側の壁が速さ \(v_0\) で左へゆっくり動く場合（\(v\gg v_0\)）のエネルギー変化・作用変数の変化を求めよ。</p></div>
+      <span class="solution-label">解説：J の計算（壁が静止）</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">\(\oint p\,dx\) の意味と積分経路</span>
+          \(\oint\) は「行きと帰りを1往復する」閉じた経路にそって積分することを表します。粒子は −L から +L まで一定の速さで進み（\(p=+\sqrt{2mE}\)）、壁で跳ね返って +L から −L まで戻る（\(p=-\sqrt{2mE}\)）ので、下のように往路・復路で2つの積分に分けて計算します。J は相空間 (x,p) 上でこの往復運動が描く長方形の面積（\(4L\times\sqrt{2mE}\)）に一致します。
+        </div>
+        $$p=\begin{cases}\sqrt{2mE} & (-L\to L)\\ -\sqrt{2mE} & (L\to -L)\end{cases}$$
+        $$-J = \int_{-L}^{L}\sqrt{2mE}\,dx+\int_{L}^{-L}(-\sqrt{2mE})\,dx \ \Rightarrow\ J = 4L\sqrt{2mE}$$
+        <p><strong>壁が動く場合（弾性衝突 e=1）</strong></p>
+        <div class="stumble">
+          <span class="stumble-label">v′=−(v+2v₀) の求め方</span>
+          速さ v₀ で左へ動く壁（質量が非常に大きい）に、速さ v で右向きに進む粒子（左向きを負にとると衝突前の速度は +v）が弾性衝突する場合を考えます。壁と一緒に動く座標系（壁から見た速度は v+v₀）に乗り移ると、弾性衝突では壁から見た相対速度の大きさは変わらず向きだけ反転するので、跳ね返った後の壁から見た速度は −(v+v₀) になります。これを元の静止系に戻す（壁の速度 −v₀ を足す）と、衝突後の粒子の速度は −(v+v₀)−v₀=−(v+2v₀) となります。壁が動いている分だけ、粒子は普通の壁で跳ね返るときより余分に運動量・エネルギーを受け取ることになります。
+        </div>
+        $$v'=-(v+2v_0)$$
+        <p>衝突後のエネルギー：</p>
+        $$E' = \frac{m}{2}(v+2v_0)^2 = \frac{m}{2}v^2\left(1+2\frac{v_0}{v}\right)^2+O\!\left(\left(\frac{v_0}{v}\right)^2\right)$$
+        $$\sqrt{E'}=\sqrt{E}\left(1+\frac{v_0}{v}+O\!\left(\left(\frac{v_0}{v}\right)^2\right)\right)$$
+        <p>1往復の時間 \(T=2L/v\) とし、\(\Delta J_1\)（静止区間の寄与）、\(\Delta J_2\)（衝突直後の寄与）に分けて評価する（下記Q2）。</p>
+      </div>
+    </div>
+
+    <div class="problem" id="p21">
+      <div class="problem-head">
+        <div class="p-badge">21</div>
+        <div class="p-meta">
+          <div class="p-source">例題4.2内 &middot; Q2</div>
+          <div class="p-title">J の断熱不変性 O(v₀/v)</div>
+        </div>
+      </div>
+      <div class="statement"><p>J が O(v₀/v) のオーダーで不変であることを示せ。</p></div>
+      <span class="solution-label">解説</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">ΔJ₁とΔJ₂とは何か（先に全体像）</span>
+          壁がゆっくり動くと、\(J=4L\sqrt{2mE}\) の L も E も両方すこしずつ変化します。\(\Delta J_1\) は「壁がわずかに内側に動くことで長方形の横幅 L が減る」ことによる J の減少分、\(\Delta J_2\) は「衝突のたびに粒子の速さが増して縦幅 \(\sqrt{2mE}\) が増える」ことによる J の増加分です。この2つがちょうど同じオーダーで打ち消し合う、というのがこの問題の主張です。
+        </div>
+        $$E'=\frac{1}{2}mv^2\left(1+\frac{2v_0}{v}\right)^2 = E\left(1+4\frac{v_0}{v}+O\!\left(\left(\frac{v_0}{v}\right)^2\right)\right)$$
+        <p>\(\sqrt{1+\varepsilon}\approx 1+\varepsilon/2+\cdots\) を用いて</p>
+        $$\sqrt{2mE'}=\sqrt{2mE}\left(1+\frac{v_0}{v}+O\!\left(\left(\frac{v_0}{v}\right)^2\right)\right)$$
+        <p>これを用いて \(\Delta J_1\)（壁との衝突で減る面積）と \(\Delta J_2\)（速度変化で増える面積）を計算すると、両者が \(O(v_0/v)\) のオーダーで打ち消し合い</p>
+        $$\Delta J = \Delta J_1+\Delta J_2 = O\!\left(\left(\frac{v_0}{v}\right)^2\right)$$
+        <div class="result">壁がゆっくり動く（断熱的な）極限では、J は O(v₀/v) のオーダーでは変化しない（不変）。これが「断熱不変量としての作用変数」の具体例。</div>
+        <div class="tip"><span class="tip-label">補足：作用・角変数の運動方程式</span>\(H=H(J)\) のとき \(\dot J=-\partial H/\partial \omega=0\)（J=一定）、\(\dot\omega=\partial H/\partial J=\)一定\(\equiv \nu\)（\(\omega=\nu t+\omega_0\)）となり \(\partial H/\partial J=\nu=2\pi/T\) が成り立つ。</div>
+      </div>
+    </div>
+
+    <div class="problem" id="p22">
+      <div class="problem-head">
+        <div class="p-badge">22</div>
+        <div class="p-meta">
+          <div class="p-source">§4.6 正準変換の不変量 &middot; Q1</div>
+          <div class="p-title">ヤコビアン J = 1 の証明</div>
+        </div>
+      </div>
+      <div class="statement"><p>(x,y) → (r,θ)：x=r cosθ, y=r sinθ の変換において、この変換のヤコビアン J = 1 を示せ。</p></div>
+      <span class="solution-label">解説（母関数を用いた証明）</span>
+      <div class="solution">
+        <div class="stumble">
+          <span class="stumble-label">この「ヤコビアン」は何を測っているか</span>
+          ここでのヤコビアンは、単なる (x,y)→(r,θ) の座標変換のヤコビアンではなく、相空間 (x,p)→(X,P) の正準変換のヤコビアンです。\(\partial(X,P)/\partial(x,p)\) と書き、微小な面積要素 dx dp が dX dP にどれだけ拡大・縮小されるかを表します。これが 1 になるということは「正準変換は相空間の面積を変えない」という、リウヴィルの定理につながる重要な性質を意味します。
+        </div>
+        $$J=\frac{\partial(X,P)}{\partial(x,p)}=\frac{\partial(X,P)}{\partial(x,P)}\Big/\frac{\partial(x,p)}{\partial(x,P)}$$
+        <div class="stumble">
+          <span class="stumble-label">この式変形（連鎖律によるヤコビアンの分解）</span>
+          ヤコビアンには「途中の変数を経由して分解できる」という性質があります（ちょうど dy/dx=(dy/dz)/(dx/dz) のような関係の2変数版）。ここでは (x,P) を仲介する変数の組として選び、分母・分子をそれぞれ (x,P) を使って表される2×2行列式の比に書き換えています。
+        </div>
+        <p>母関数 (3.42) の \(W(x,P,t)\) を用いて \(X=\partial W''/\partial P,\ p=\partial W''/\partial x\) とすると</p>
+        $$\frac{\partial X}{\partial x}=\frac{\partial}{\partial P}\left(\frac{\partial W''}{\partial x}\right)=\frac{\partial p}{\partial P} \quad(\bigstar)$$
+        <div class="stumble">
+          <span class="stumble-label">（★）が成り立つ理由</span>
+          \(X=\partial W''/\partial P\) と \(p=\partial W''/\partial x\) は、どちらも同じ関数 W″ の1階偏微分です。偏微分の順序を入れ替えても結果が変わらない（\(\partial^2W''/\partial P\partial x=\partial^2W''/\partial x\partial P\)）という、2階微分の交換法則を使うと、\(\partial X/\partial x\) と \(\partial p/\partial P\) が実は同じ2階微分 \(\partial^2W''/\partial x\partial P\) を指していることが分かります。
+        </div>
+        <p>これを用いてヤコビアンを計算すると</p>
+        $$\frac{\partial(X,P)}{\partial(x,P)}=\begin{vmatrix}\dfrac{\partial X}{\partial x} & 0\\ \dfrac{\partial P}{\partial x} & 1\end{vmatrix}=\frac{\partial X}{\partial x},\qquad \frac{\partial(x,p)}{\partial(x,P)}=\begin{vmatrix}1 & \dfrac{\partial x}{\partial P}\\ 0 & \dfrac{\partial p}{\partial P}\end{vmatrix}=\frac{\partial p}{\partial P}$$
+        <p>(★) より、この2つのヤコビアンは等しいので</p>
+        $$J=\frac{\partial(X,P)}{\partial(x,p)}=1$$
+        <div class="tip">
+          <span class="tip-label">もっと簡単な方法</span>
+          正準変換であれば必ず J=1（面積保存則、リウヴィルの定理の一部）が成り立つことが一般論から保証されている。したがって、ある変換が正準変換であることを (3.64) や母関数の存在で示せれば、J=1 は毎回計算せずとも自動的に従う。
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 総括表 ============ -->
+    <h2 class="chapter" id="summary"><span class="chap-no">総括</span>全問題の対応表</h2>
+    <p class="chapter-note">22問すべての出典と内容の一覧です。</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>No.</th><th>出典</th><th>内容</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>3章・問1</td><td>H(x,p,t)=H(x,p) ⟹ dH/dt=0</td></tr>
+          <tr><td>2</td><td>3章・注2〔例〕</td><td>調和振動子のL,p,H,正準方程式（4小問）</td></tr>
+          <tr><td>3</td><td>3章・Q1</td><td>円筒座標でのL,共役運動量（2小問）</td></tr>
+          <tr><td>4</td><td>参考書P.138問9-1</td><td>落下運動のL,p,H,正準方程式（4小問）</td></tr>
+          <tr><td>5</td><td>3章・Q1</td><td>(3.42)の確認</td></tr>
+          <tr><td>6</td><td>3章・Q2</td><td>恒等変換の確認</td></tr>
+          <tr><td>7</td><td>3章・Q3</td><td>(3.43)の導出</td></tr>
+          <tr><td>8</td><td>例題3.1</td><td>極座標への正準変換とT</td></tr>
+          <tr><td>9</td><td>例題3.2</td><td>(X,P)=(p,−x)の正準性</td></tr>
+          <tr><td>10</td><td>例題3.2・Q1</td><td>(3.58)の確認</td></tr>
+          <tr><td>11</td><td>例題3.3</td><td>\(X=k\sqrt{2x}\cos p,\ P=(1/k)\sqrt{2x}\sin p\)</td></tr>
+          <tr><td>12</td><td>例題3.3・Q2</td><td>正準変数であることの確認</td></tr>
+          <tr><td>13</td><td>演習問題〔4〕</td><td>単振動の正準変換（3小問）</td></tr>
+          <tr><td>14</td><td>章末問題〔5〕</td><td>質量が変化する調和振動子の保存量</td></tr>
+          <tr><td>15</td><td>先生の問題・〔例〕Q1</td><td>角運動量による回転生成子</td></tr>
+          <tr><td>16</td><td>先生の問題・Q2</td><td>ネーターの定理の証明①</td></tr>
+          <tr><td>17</td><td>先生の問題・Q3</td><td>ネーターの定理の証明②(☆の導出)</td></tr>
+          <tr><td>18</td><td>例題4.1</td><td>自由粒子のHJ方程式</td></tr>
+          <tr><td>19</td><td>演習問題〔1〕</td><td>調和振動子のHJ方程式</td></tr>
+          <tr><td>20</td><td>例題4.2</td><td>箱の中の粒子、\(J=\oint p\,dx\)</td></tr>
+          <tr><td>21</td><td>例題4.2・Q2</td><td>Jが O(v₀/v)で不変であることの証明</td></tr>
+          <tr><td>22</td><td>§4.6・Q1</td><td>正準変換のヤコビアンJ=1の証明</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>解析力学 問題整理と解説 &middot; ノート原文に基づく再構成（基礎知識・補足説明つき）</footer>
+
+  </main>
+</div>
+
+</body>
+</html>
